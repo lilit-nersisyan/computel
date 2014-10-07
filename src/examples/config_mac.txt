@@ -1,6 +1,6 @@
 ###directories
 
-scripts.dir	.
+scripts.dir	./scripts
 bowtie.build.path	../mac/bowtie2-2.1.0/bowtie2-build
 bowtie.align.path	../mac/bowtie2-2.1.0/bowtie2-align
 samtools.path	../mac/samtools-0.1.19/samtools
