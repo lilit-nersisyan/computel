@@ -242,12 +242,12 @@ if(is.na(file.info(output.dir)$isdir || !file.info(output.dir)$isdir)){
 
 scripts.dir = set.property(config.table, "scripts.dir", defaults$scripts.dir)
 scripts.dir.set = F
-if ( file.info(scripts.dir)$isdir){
+#if ( file.info(scripts.dir)$isdir){
   if (file.exists(file.path(scripts.dir, "pipeline.R")))
     if (file.exists(file.path(scripts.dir, "functions.R"))){      
       scripts.dir.set = T
     }
-}
+#}
 if (!scripts.dir.set){
   cat("scripts.dir does not exist or does not contain the required scripts\n")
   config.set = F
