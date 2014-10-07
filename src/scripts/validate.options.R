@@ -97,14 +97,14 @@ set.property.executable <- function(matrix, prop.name, default.value){
     setwd(wd)
   }
   
-  if (length(grep(pattern="../*", result)) > 0){    
-    result = sub(pattern="..", replacement=parent, result)
-  } else if (length(grep(pattern="./*", result)) > 0){
-    result = sub(pattern="..", replacement=parent, result)
-  } else   if (length(grep(pattern="..\\*", result)) > 0){    
-    result = sub(pattern="..", replacement=parent, result)
-  } else if (length(grep(pattern=".\\*", result)) > 0){
-    result = sub(pattern="..", replacement=parent, result)
+   if (length(grep(pattern="../", result, fixed = T)) > 0){    
+    result = sub(pattern="..", replacement=parent, result, fixed = T)
+  } else if (length(grep(pattern="./", result, fixed = T)) > 0){
+    result = sub(pattern=".", replacement=wd, result, fixed = T)
+  } else   if (length(grep(pattern="..\\", result, fixed = T)) > 0){    
+    result = sub(pattern="..", replacement=parent, result, fixed = T)
+  } else if (length(grep(pattern=".\\", result, fixed = T)) > 0){
+    result = sub(pattern=".", replacement=wd, result, fixed = T)
   } 
   
   return(result)
@@ -253,19 +253,19 @@ if (!scripts.dir.set){
   config.set = F
 }
 
-bowtie.build.path = set.property.executable(config.table, "bowtie.build.path", defaults$bowtie.build.path.path)
+bowtie.build.path = set.property.executable(config.table, "bowtie.build.path", defaults$bowtie.build.path)
 if (!file.exists(bowtie.build.path)){
   cat("bowtie.build executable could not be found at ", bowtie.build.path, "\n")
   config.set = F
 }
 
-bowtie.align.path = set.property.executable(config.table, "bowtie.align.path", defaults$bowtie.align.path.path)
+bowtie.align.path = set.property.executable(config.table, "bowtie.align.path", defaults$bowtie.align.path)
 if (!file.exists(bowtie.align.path)){
   cat("bowtie.align executable not be found at ", bowtie.align.path, "\n")
   config.set = F
 }
 
-samtools.path = set.property.executable(config.table, "samtools.path", defaults$samtools.path.path)
+samtools.path = set.property.executable(config.table, "samtools.path", defaults$samtools.path)
 if (!file.exists(samtools.path)){
   cat("samtools.path", samtools.path, "does not exist\n")
   config.set = F

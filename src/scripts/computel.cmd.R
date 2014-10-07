@@ -20,7 +20,7 @@ config.table = as.matrix(read.table(file=config.file, header=F, sep="\t",
 prop.name = 'scripts.dir'
 default.value = './'
 scripts.dir = tryCatch({
-    matrix[prop.name,1]
+    config.table[prop.name,1]
   }, warning = function(w) {
     default.value
   }, error = function(e) {
@@ -32,7 +32,7 @@ if (!file.exists(validate.R)){
 }
 
 if (!file.exists(validate.R)){
-  stop("validate.options.R not found.\n Provide scripts.dir containing the script.")
+  stop(paste("the script", validate.R, "was not found.\n Provide a valid configuration for scripts.dir, containing the script."))
 } else {
   source(validate.R)
 }
