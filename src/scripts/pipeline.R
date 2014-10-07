@@ -59,7 +59,7 @@ if (!success){
   
   no.unal = ifelse(compute.base.cov,"", "--no-unal")
   
-  align.args$additional.options = paste("-p", num.proc, 
+  align.args$additional.options = paste("-p", num.proc,quals, 
                                         no.unal, "--n-ceil", rl-min.seed, 
                                         "-D 20 -R 3 -N 1 -L", l, "-i S,1,0.5")
   align.args$mode = ifelse(mode.local, "--local", "--end-to-end")
@@ -143,7 +143,7 @@ if (!success){
       base.align.args$x = file.path(base.index.pathtoprefix)
       base.align.args$S = file.path(base.dir, "base.align.sam")  
       
-      base.align.args$additional.options = paste("-p", num.proc)
+      base.align.args$additional.options = paste("-p", num.proc, quals)
       base.align.args$mode = ifelse(mode.local, "--local", "--end-to-end")
       
       if(single){
@@ -166,18 +166,17 @@ if (!success){
         
         base.cov = base.coverage(coverage.file)
       } 
-      
-      # Compute telomere length
-      #######################################################################################
-      #######################################################################################
-      cat("estimating telomere length \n")
-      tel.length.out = file.path(output.dir, "tel.length.xls")
-      tel.length  = tel.length(tel.coverage, rl, pl= nchar(pattern), 
-                               base.cov, num.haploid.chr, tel.length.out)
-      
-      cat("Telomere computation successfully complete.\n")
-      cat("Output stored at ", tel.length.out, "\n")
-      
     }
+    # Compute telomere length
+    #######################################################################################
+    #######################################################################################
+    cat("estimating telomere length \n")
+    tel.length.out = file.path(output.dir, "tel.length.xls")
+    tel.length  = tel.length(tel.coverage, rl, pl= nchar(pattern), 
+                             base.cov, num.haploid.chr, tel.length.out)
+    
+    cat("Telomere computation successfully complete.\n")
+    cat("Output stored at ", tel.length.out, "\n")
+    
   }
 }

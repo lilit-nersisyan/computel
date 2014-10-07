@@ -1,6 +1,6 @@
 ###directories
 
-scripts.dir	./
+scripts.dir	./scripts
 bowtie.build.path	../windows/bowtie2-2.1.0-win/bowtie2-build.exe
 bowtie.align.path	../windows/bowtie2-2.1.0-win/bowtie2-align.exe
 samtools.path	../windows/samtools-win/samtools.exe
@@ -23,7 +23,7 @@ mode.local	F
 
 ###base_coverage_calculation_options
 
-compute.base.cov	T
+compute.base.cov	F
 base.cov	5.4
 base.index.pathtoprefix	../examples/base.index/base_index
 
@@ -34,3 +34,7 @@ output.dir	../examples/output
 ###system_options
 
 num.proc	3
+
+###additional_options
+
+quals	"--phred33"	#default: --phred33, alternatives: --phred64, --solexa-quals

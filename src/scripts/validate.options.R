@@ -125,7 +125,8 @@ defaults = list(
   bowtie.dir = "../bowtie2-2.1.0/",
   bowtie.build.path = "..bowtie2-2.1.0/bowtie2-build.exe",
   bowtie.align.path = "../bowtie2-2.1.0/bowtie2-align.exe", 
-  samtools.path = "../samtools-0.1.19/samtools.exe"
+  samtools.path = "../samtools-0.1.19/samtools.exe",
+  quals = "--phred33"
 )
 rl = set.property.integer(config.table, "read.length", defaults$rl)
 pattern = set.property.sequence(config.table, "pattern", defaults$pattern)
@@ -136,6 +137,14 @@ mode.local = set.property.logical(config.table, "mode.local", defaults$mode.loca
 single = set.property.logical(config.table, "single", defaults$single)
 min.seed = set.property.integer(config.table, "min.seed", defaults$min.seed)
 num.proc = set.property.integer(config.table, "num.proc", defaults$num.proc)
+
+quals = set.property(config.table, "quals", defaults$quals)
+if (quals != "--phred33"){
+  if (quals != "--phred64"){
+    if(quals != "--solexa-quals")
+      quals = defaults$quals
+  }
+}
 
 if(single){  
   fastq = tryCatch({
@@ -303,7 +312,7 @@ if (config.set) {
   
   cat("output.dir= ", output.dir,"\n")   
   cat ("num.proc=", num.proc, "\n")  
-  
+  cat("quals=", quals, "\n")
   pipeline.R = file.path(scripts.dir, "pipeline.R")
   
 }
