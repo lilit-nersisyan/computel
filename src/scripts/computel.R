@@ -4,7 +4,7 @@
 ###directories
 
 
-scripts.dir="./"
+scripts.dir="scripts"
 bowtie.build.path="../windows/bowtie2-2.1.0-win/bowtie2-build.exe"
 bowtie.align.path="../windows/bowtie2-2.1.0-win/bowtie2-align.exe"
 samtools.path="../windows/samtools-win/samtools.exe"
@@ -70,7 +70,6 @@ config.table['num.proc'] = num.proc
 
 config.table = as.matrix(config.table)
 
-setwd(scripts.dir)
 validate.R = file.path(scripts.dir, "validate.options.R")
 if (!file.exists(validate.R))
   validate.R = "validate.options.R"
