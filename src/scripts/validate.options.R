@@ -280,7 +280,8 @@ if (config.set) {
   cat("bowtie.build.path =", bowtie.build.path, "\n")
   cat("bowtie.align.path =", bowtie.align.path, "\n")
   cat("samtools.path =", samtools.path, "\n")
-  cat("picard.samtofastq.jar =", picard.samtofastq.jar, "\n")
+  if(compute.base.cov)
+	cat("picard.samtofastq.jar =", picard.samtofastq.jar, "\n")
   cat("single =", single, "\n")
   if (single) {
     cat("fastq =", fastq, "\n")
