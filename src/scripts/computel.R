@@ -39,6 +39,11 @@ output.dir="../examples/output"
 
 num.proc=3
 
+###additional_options
+
+quals="--phred33" #default: --phred33, alternatives: --phred64, --solexa-quals
+
+
 ################################################################
 ####     assemble options in config.table for validation    ####
 ################################################################
@@ -67,6 +72,7 @@ config.table['base.index.pathtoprefix'] = base.index.pathtoprefix
 
 config.table['output.dir'] = output.dir
 config.table['num.proc'] = num.proc
+config.table['quals']=quals
 
 config.table = as.matrix(config.table)
 
