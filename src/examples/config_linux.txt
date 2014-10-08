@@ -34,3 +34,4 @@ output.dir	output
 ###system_options
 
 num.proc	3
+ignore.err	F

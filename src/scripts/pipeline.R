@@ -72,7 +72,7 @@ if (!success){
     align.args$m2 = fastq2
     reads = as.character(paste('-1', align.args$m1,'-2', align.args$m2))
   }
-  
+  align.args$ignore.err = ignore.err
   success = do.call(bowtie.align, args=align.args)  
   if (!success){
     stop("Problem aligning reads to telomeric index\n")

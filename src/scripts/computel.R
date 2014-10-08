@@ -42,7 +42,7 @@ num.proc=3
 ###additional_options
 
 quals="--phred33" #default: --phred33, alternatives: --phred64, --solexa-quals
-ignore.err=F
+ignore.err=T
 
 
 ################################################################

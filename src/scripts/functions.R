@@ -30,6 +30,11 @@ build.tel.index <- function(pattern, read.length, min.seed,
   call.cmd(command)
   setwd(this)
   success = file.exists(paste(tel.index.dir,"/", tel.index.prefix, ".1.bt2",sep=""))
+  if (success){
+    if (!ignore.err){
+      success = (call.out == 0)
+    }
+  }
   return(success)
   
 }

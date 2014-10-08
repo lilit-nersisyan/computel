@@ -126,7 +126,7 @@ defaults = list(
   bowtie.build.path = "..bowtie2-2.1.0/bowtie2-build.exe",
   bowtie.align.path = "../bowtie2-2.1.0/bowtie2-align.exe", 
   samtools.path = "../samtools-0.1.19/samtools.exe",
-  quals = "--phred33"
+  quals = "--phred33",
   ignore.err = F
 )
 rl = set.property.integer(config.table, "read.length", defaults$rl)
