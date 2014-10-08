@@ -126,7 +126,8 @@ defaults = list(
   bowtie.build.path = "..bowtie2-2.1.0/bowtie2-build.exe",
   bowtie.align.path = "../bowtie2-2.1.0/bowtie2-align.exe", 
   samtools.path = "../samtools-0.1.19/samtools.exe",
-  quals = ""
+  quals = "--phred33"
+  ignore.err = F
 )
 rl = set.property.integer(config.table, "read.length", defaults$rl)
 pattern = set.property.sequence(config.table, "pattern", defaults$pattern)
@@ -145,6 +146,8 @@ if (quals != "--phred33"){
       quals = defaults$quals
   }
 }
+
+ignore.err = set.property.logical(config.table, 'ingnore.err', defaults$ignore.err)
 
 if(single){  
   fastq = tryCatch({
@@ -313,6 +316,7 @@ if (config.set) {
   cat("output.dir= ", output.dir,"\n")   
   cat ("num.proc=", num.proc, "\n")  
   cat("quals=", quals, "\n")
+  cat("ingore.err=", ignore.err, "\n")
   pipeline.R = file.path(scripts.dir, "pipeline.R")
   
 }

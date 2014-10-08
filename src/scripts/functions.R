@@ -106,7 +106,7 @@ string2vector <- function(pattern){
 
 bowtie.align <- function(bowtie.align.path, x, m1=NA, m2=NA, U=NA, S = "align.sam", 
                          mode="--end-to-end", 
-                         additional.options = "") {
+                         additional.options = "", ignore.err = F) {
   args = ls();
   index = as.character(paste('-x', x))    
   
@@ -124,8 +124,13 @@ bowtie.align <- function(bowtie.align.path, x, m1=NA, m2=NA, U=NA, S = "align.sa
   cat("\nPerforming alignment with command:\n")
   command = as.character(paste(bowtie.align.path, options,index, reads, samout));   
   cat(command)
-  call.cmd(command)
+  call.out = call.cmd(command)
   success = (file.exists(S) && file.info(S)$size > 0)
+  if (success){
+    if (!ignore.err){
+      success = (call.out == 0)
+    }
+  }
   return(success)
 }
 
