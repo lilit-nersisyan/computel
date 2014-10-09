@@ -38,7 +38,8 @@ dir.create(align.dir, showWarnings=F)
 #######################################################################################
 #######################################################################################
 cat("\nBuilding telomeric index in the directory", tel.index.dir, "\n")
-success = build.tel.index(pattern, rl, min.seed=12, tel.index.dir, tel.index.prefix, bowtie.build.path)
+success = build.tel.index(pattern, rl, min.seed=12, tel.index.dir, tel.index.prefix, 
+                          bowtie.build.path, ignore.err)
 if (!success){
   stop("Problem building telomeric index")
 } else {

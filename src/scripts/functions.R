@@ -8,7 +8,8 @@ call.cmd <- function(command){
 }
 
 build.tel.index <- function(pattern, read.length, min.seed, 
-                            tel.index.dir, tel.index.prefix, bowtie.build.path){
+                            tel.index.dir, tel.index.prefix, 
+                            bowtie.build.path, ignore.err = F){
   pattern = string2vector(pattern)
   pattern = complement(pattern)
   pattern.length = read.length+length(pattern)-1;
@@ -27,7 +28,7 @@ build.tel.index <- function(pattern, read.length, min.seed,
   setwd(tel.index.dir)
   command = paste(bowtie.build.path, '--quiet', tel.index.fasta,  tel.index.prefix)
   print(command)
-  call.cmd(command)
+  call.out = call.cmd(command)
   setwd(this)
   success = file.exists(paste(tel.index.dir,"/", tel.index.prefix, ".1.bt2",sep=""))
   if (success){
