@@ -8,9 +8,9 @@ picard.samtofastq.jar	../SamToFastq.jar
 
 ###input_reads
 
-fastq1	../examples/tel_reads1.fq
-fastq2	../examples/tel_reads2.fq
-fastq	../examples/tel_reads.fq
+fastq1	./examples/tel_reads1.fq
+fastq2	./examples/tel_reads2.fq
+fastq	./examples/tel_reads.fq
 single	F
 read.length	76
 
