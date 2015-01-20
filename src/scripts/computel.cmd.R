@@ -2,6 +2,7 @@ args <- commandArgs(TRUE)
 
 config.file = args[1]
 
+
 if (length(args) < 1){  
   cat("\nUsage: \n\n Rscript computel.cmd.R [path.to.config.file]\n\n")
   stop("No config file provided")

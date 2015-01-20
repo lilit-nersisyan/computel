@@ -7,25 +7,33 @@ samtools.path	../mac/samtools-0.1.19/samtools
 picard.samtofastq.jar	../SamToFastq.jar
 
 ###input_reads
-
-fastq1	./examples/tel_reads1.fq
-fastq2	./examples/tel_reads2.fq
-fastq	./examples/tel_reads.fq
-single	F
 read.length	76
 
-###algorithm_options
+##paired-end reads (if single is F)
+fastq1	examples/tel_reads1.fq
+fastq2	examples/tel_reads2.fq
 
-pattern	TTAGGG
-num.haploid.chr	23
-min.seed	12
-mode.local	F
+##single-end reads (if single is T)
+single	T
+files.with.prefix	F
+
+#if single is T and files.with.prefix is F
+#single-end reads: specify one or many fastq files  (comma or space separated)
+fastq	examples/tel_reads.fq, examples/tel_reads1.fq, examples/tel_reads2.fq
+
+#if single is T and files.with.prefix is T
+#single-end reads: specify fastq files with file prefix and directory 
+
+fastq.dir	examples
+fastq.prefix	tel_reads
+
+
 
 ###base_coverage_calculation_options
 
 compute.base.cov	T
 base.cov	5.4
-base.index.pathtoprefix	../examples/base.index/base_index
+base.index.pathtoprefix	./examples/base.index/base_index
 
 ###output_options
 

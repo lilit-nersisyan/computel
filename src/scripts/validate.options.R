@@ -97,7 +97,7 @@ set.property.executable <- function(matrix, prop.name, default.value){
     setwd(wd)
   }
   
-   if (length(grep(pattern="../", result, fixed = T)) > 0){    
+  if (length(grep(pattern="../", result, fixed = T)) > 0){    
     result = sub(pattern="..", replacement=parent, result, fixed = T)
   } else if (length(grep(pattern="./", result, fixed = T)) > 0){
     result = sub(pattern=".", replacement=wd, result, fixed = T)
@@ -119,6 +119,7 @@ defaults = list(
   compute.base.cov = F,
   mode.local = F,
   single = T,
+  files.with.prefix = F,
   min.seed = 12,
   num.proc = 3,
   scripts.dir = "./",
@@ -136,6 +137,7 @@ num.haploid.chr = set.property.integer(config.table, "num.haploid.chr", defaults
 compute.base.cov = set.property.logical(config.table, "compute.base.cov",  defaults$compute.base.cov)
 mode.local = set.property.logical(config.table, "mode.local", defaults$mode.local)
 single = set.property.logical(config.table, "single", defaults$single)
+files.with.prefix = set.property.logical(config.table, "files.with.prefix", defaults$files.with.prefix)
 min.seed = set.property.integer(config.table, "min.seed", defaults$min.seed)
 num.proc = set.property.integer(config.table, "num.proc", defaults$num.proc)
 
@@ -150,21 +152,56 @@ if (quals != "--phred33"){
 ignore.err = set.property.logical(config.table, 'ingnore.err', defaults$ignore.err)
 
 if(single){  
-  fastq = tryCatch({
-    config.table["fastq",1]
-  }, warning = function(w) {
-    cat("\"fastq\" parameter not specified for single mode alignment\n")    
-    config.set = F
-  }, error = function(e) {
-    cat("\"fastq\" parameter not specified for single mode alignment\n")
-    config.set = F
-  })
-  
-  if (!file.exists(fastq)){
-    cat("fastq file ", fastq, 
-        " does not exist. Please, specify a valid file for single mode alignment.\n")
-    config.set = F
-  }    
+  if (!files.with.prefix){
+    fastq = tryCatch({
+      config.table["fastq",1]
+    }, warning = function(w) {
+      cat("\"fastq\" parameter not specified for single mode alignment\n")    
+      config.set = F
+    }, error = function(e) {
+      cat("\"fastq\" parameter not specified for single mode alignment\n")
+      config.set = F
+    })
+    names(fastq) <- NULL
+    
+    fastqs = unlist(strsplit(fastq, split='[ ,]' , fixed=F))
+    fastqs = fastqs[!duplicated(fastqs)]
+    empty.fastqs = c()
+    for (i in 1:length(fastqs)){
+      if (identical(fastqs[i], "")) {
+        empty.fastqs = c(empty.fastqs,i)
+      } else if (!file.exists(fastqs[i])){
+        cat("fastq file ", fastqs[i], 
+            " does not exist. Please, specify a valid file for single mode alignment.\n")
+        config.set = F      
+      }
+    }
+    if(length(empty.fastqs) > 0)
+      fastqs=fastqs[-empty.fastqs]
+  } else {
+    fastq.prefix = tryCatch({
+      config.table["fastq.prefix",1]
+    }, warning = function(w) {
+      cat("\"fastq.prefix\" parameter not specified for single mode alignment\n")    
+      config.set = F
+    }, error = function(e) {
+      cat("\"fastq.prefix\" parameter not specified for single mode alignment\n")
+      config.set = F
+    })
+    fastq.dir = tryCatch({
+      config.table["fastq.dir",1]
+    }, warning = function(w) {
+      cat("\"fastq.dir\" parameter not specified for single mode alignment\n")    
+      config.set = F
+    }, error = function(e) {
+      cat("\"fastq.dir\" parameter not specified for single mode alignment\n")
+      config.set = F
+    })
+    fastq.files = list.files(path=fastq.dir, pattern=paste(fastq.prefix, "*",sep=""))
+    fastqs = file.path(fastq.dir, fastq.files)
+    if (length(list.files) == 0)
+      cat("no files with prefix ", fastq.prefix, " were present in the directory ", fastq.dir)     
+  }  
 } else {
   fastq1 = tryCatch({
     config.table["fastq1",1]
@@ -255,10 +292,10 @@ if(is.na(file.info(output.dir)$isdir || !file.info(output.dir)$isdir)){
 scripts.dir = set.property(config.table, "scripts.dir", defaults$scripts.dir)
 scripts.dir.set = F
 #if ( file.info(scripts.dir)$isdir){
-  if (file.exists(file.path(scripts.dir, "pipeline.R")))
-    if (file.exists(file.path(scripts.dir, "functions.R"))){      
-      scripts.dir.set = T
-    }
+if (file.exists(file.path(scripts.dir, "pipeline.R")))
+  if (file.exists(file.path(scripts.dir, "functions.R"))){      
+    scripts.dir.set = T
+  }
 #}
 if (!scripts.dir.set){
   cat("scripts.dir does not exist or does not contain the required scripts\n")
@@ -293,10 +330,10 @@ if (config.set) {
   cat("bowtie.align.path =", bowtie.align.path, "\n")
   cat("samtools.path =", samtools.path, "\n")
   if(compute.base.cov)
-	cat("picard.samtofastq.jar =", picard.samtofastq.jar, "\n")
+    cat("picard.samtofastq.jar =", picard.samtofastq.jar, "\n")
   cat("single =", single, "\n")
   if (single) {
-    cat("fastq =", fastq, "\n")
+    cat("fastqs =", fastqs, "\n")
   } else {
     cat("fastq1 =", fastq1, "\n")
     cat("fastq2 =", fastq2, "\n")

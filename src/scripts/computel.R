@@ -11,12 +11,24 @@ samtools.path="../windows/samtools-win/samtools.exe"
 picard.samtofastq.jar="../SamToFastq.jar"
 
 ###input_reads
+read.length=76
 
-fastq1="../examples/tel_reads1.fq"
-fastq2="../examples/tel_reads2.fq"
-fastq="../examples/tel_reads.fq"
-single=F
-read.length=rl=76
+#paired-end reads
+fastq1="examples/tel_reads1.fq"
+fastq2="examples/tel_reads2.fq"
+
+#single-end reads (if single is T)
+single=T
+files.with.prefix =  F
+
+#if files.with.prefix is F
+#specify one or many fastq files
+fastq="examples/tel_reads.fq,../examples/tel_reads1.fq     ../examples/tel_reads2.fq"
+
+#if files.with.prefix is T
+#specify fastq files with their prefix and directory 
+fastq.dir="examples"
+fastq.prefix="tel_reads"
 
 ###algorithm_options
 
@@ -27,13 +39,13 @@ mode.local=F
 
 ###base_coverage_calculation_options
 
-compute.base.cov=T
+compute.base.cov=F
 base.cov=5.4
-base.index.pathtoprefix="../examples/base.index/base_index"
+base.index.pathtoprefix="examples/base.index/base_index"
 
 ###output_options
 
-output.dir="../examples/output"
+output.dir='examples/output'
 
 ###system_options
 
@@ -58,8 +70,11 @@ config.table['picard.samtofastq.jar'] = picard.samtofastq.jar
 
 config.table['fastq1'] = fastq1
 config.table['fastq2'] = fastq2
-config.table['fastq'] = fastq
 config.table['single'] = single
+config.table['fastq'] = fastq
+config.table['files.with.prefix'] = files.with.prefix
+config.table['fastq.dir'] = fastq.dir
+config.table['fastq.prefix']=fastq.prefix
 config.table['read.length'] = read.length
 
 config.table['pattern'] = pattern

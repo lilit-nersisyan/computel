@@ -7,12 +7,27 @@ samtools.path	../windows/samtools-win/samtools.exe
 picard.samtofastq.jar	../SamToFastq.jar
 
 ###input_reads
-
-fastq1	./examples/tel_reads1.fq
-fastq2	./examples/tel_reads2.fq
-fastq	./examples/tel_reads.fq
-single	F
 read.length	76
+
+##paired-end reads (if single is F)
+fastq1	examples/tel_reads1.fq
+fastq2	examples/tel_reads2.fq
+
+##single-end reads (if single is T)
+single	T
+files.with.prefix	F
+
+#if single is T and files.with.prefix is F
+#single-end reads: specify one or many fastq files  (comma or space separated)
+fastq	examples/tel_reads.fq, examples/tel_reads1.fq, examples/tel_reads2.fq
+
+#if single is T and files.with.prefix is T
+#single-end reads: specify fastq files with file prefix and directory 
+
+fastq.dir	examples
+fastq.prefix	tel_reads
+
+
 
 ###algorithm_options
 
@@ -24,12 +39,12 @@ mode.local	F
 ###base_coverage_calculation_options
 
 compute.base.cov	F
-base.cov	5.4
-base.index.pathtoprefix	../examples/base.index/base_index
+base.cov	10
+base.index.pathtoprefix	./examples/base.index/base_index
 
 ###output_options
 
-output.dir	../examples/output
+output.dir	./examples/output
 
 ###system_options
 

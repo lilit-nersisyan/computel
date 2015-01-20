@@ -66,7 +66,7 @@ if (!success){
   align.args$mode = ifelse(mode.local, "--local", "--end-to-end")
   
   if(single){
-    align.args$U = fastq
+    align.args$U = paste(fastqs,collapse=",")
     reads = as.character(paste('-U', align.args$U))  
   } else {
     align.args$m1 = fastq1
