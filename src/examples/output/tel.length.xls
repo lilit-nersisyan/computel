@@ -1,0 +1,7 @@
+"V1"
+"coverage.file"	./examples/output/align/tel.align.bam.coverage.txt
+"read.length"	76
+"pattern.length"	6
+"base.cov"	10
+"num.haploid.chr"	23
+"tel.length"	588.832608695652

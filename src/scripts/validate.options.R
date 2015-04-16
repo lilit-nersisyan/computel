@@ -67,7 +67,7 @@ set.property.sequence <- function(matrix, prop.name, default.value){
       cat("Illegal value for ", prop.name, ": ", result, 
           "Should contain DNA sequence characters ", dna.chars, ". Defualt value assigned: ",
           default.value, "\n")
-    default.value
+    result
   }, warning = function(w) {
     cat("Warning: Illegal value for", prop.name, ": ", result, 
         "Should be numeric. Default value assigned: ", default.value, "\n")  

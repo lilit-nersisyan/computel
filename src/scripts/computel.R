@@ -39,7 +39,7 @@ mode.local=F
 
 ###base_coverage_calculation_options
 
-compute.base.cov=F
+compute.base.cov=T
 base.cov=5.4
 base.index.pathtoprefix="examples/base.index/base_index"
 
