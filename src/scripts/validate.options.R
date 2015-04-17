@@ -149,7 +149,7 @@ if (quals != "--phred33"){
   }
 }
 
-ignore.err = set.property.logical(config.table, 'ingnore.err', defaults$ignore.err)
+ignore.err = set.property.logical(config.table, 'ignore.err', defaults$ignore.err)
 
 if(single){  
   if (!files.with.prefix){
