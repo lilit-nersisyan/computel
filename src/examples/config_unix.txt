@@ -35,7 +35,7 @@ fastq	examples/tel_reads.fq, examples/tel_reads1.fq, examples/tel_reads2.fq
 
 
 ******** file compression type (can be 'F' (not compressed), "gz" or "bz2") - works only for single-end reads! 
-file.compression	gz
+file.compression	F
 
 
 
@@ -54,7 +54,7 @@ compute.base.cov	F
 base.cov	5.4
 base.index.pathtoprefix	./examples/base.index/base_index
 
-estimate.base.cov	T	#if 'T' and files are compressed, base coverage will be estimated during unzipping
+estimate.base.cov	F	#if 'T' and files are compressed, base coverage will be estimated during unzipping
 genome.length	3101804739
 
 
