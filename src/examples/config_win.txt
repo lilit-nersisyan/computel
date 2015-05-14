@@ -1,56 +1,74 @@
-###directories
+#########################################################################
+##############                 directories                 ##############
+#########################################################################
 
 scripts.dir	./scripts
-bowtie.build.path	../windows/bowtie2-2.1.0-win/bowtie2-build.exe
-bowtie.align.path	../windows/bowtie2-2.1.0-win/bowtie2-align.exe
-samtools.path	../windows/samtools-win/samtools.exe
-picard.samtofastq.jar	../SamToFastq.jar
+bowtie.build.path	./bowtie2-2.1.0-win/bowtie2-build.exe
+bowtie.align.path	./bowtie2-2.1.0-win/bowtie2-align.exe
+samtools.path	./samtools-win/samtools.exe
+picard.samtofastq.jar	./SamToFastq.jar
 
-###input_reads
+
+#########################################################################
+##############                 input reads                 ##############
+#########################################################################
+
 read.length	76
+quals	--phred33 	#default: --phred33, alternatives: --phred64, --solexa-quals
 
-##paired-end reads (if single is F)
+******** treat reads as single-end (single set to T) or paired-end (single set to F)
+single	T
+******** note: paired-end reads can effectively be treated as single-end, thus single is 'T' by default 
+******** note: compressed files can only be supplied as single-end reads 
+
+******** single-end reads # if files.with.prefix is 'T', files should be specified by filename prefix; if it is 'F' - by absolute paths 
+files.with.prefix	T	
+
+
+******** single-end reads specified by filename prefix (files.with.prefix is set to T)
+fastq.prefix	tel_reads
+fastq.dir	examples
+
+******** single-end reads specified by file paths (files.with.prefix is set to F)
+fastq	examples/tel_reads.fq, examples/tel_reads1.fq, examples/tel_reads2.fq	
+
+
+******** if paired-end read alignment is prefered, 'single' should be set to 'F', and read pairs specified below: 
+******** paired-end reads file paths (set single to F)
 fastq1	examples/tel_reads1.fq
 fastq2	examples/tel_reads2.fq
 
-##single-end reads (if single is T)
-single	T
-files.with.prefix	F
+#########################################################################
+#############                 base coverage                 #############
+#########################################################################
 
-#if single is T and files.with.prefix is F
-#single-end reads: specify one or many fastq files  (comma or space separated)
-fastq	examples/tel_reads.fq, examples/tel_reads1.fq, examples/tel_reads2.fq
+******** the base coverage is given or should be computed
+compute.base.cov	F
 
-#if single is T and files.with.prefix is T
-#single-end reads: specify fastq files with file prefix and directory 
+base.cov	5.4
+base.index.pathtoprefix	./examples/base.index/base_index
 
-fastq.dir	examples
-fastq.prefix	tel_reads
+#########################################################################
+################                 output                 #################
+#########################################################################
+
+output.dir	output
 
 
+#########################################################################
+###########                 execution options                 ###########
+#########################################################################
 
-###algorithm_options
+num.proc	3
+ignore.err	F
+
+
+#########################################################################
+###########                 algorithm_options                 ###########
+#########################################################################
 
 pattern	TTAGGG
 num.haploid.chr	23
 min.seed	12
 mode.local	F
 
-###base_coverage_calculation_options
-
-compute.base.cov	F
-base.cov	10
-base.index.pathtoprefix	./examples/base.index/base_index
-
-###output_options
-
-output.dir	./examples/output
-
-###system_options
-
-num.proc	3
-
-###additional_options
-
-quals	"--phred33"	#default: --phred33, alternatives: --phred64, --solexa-quals
-ignore.err	F

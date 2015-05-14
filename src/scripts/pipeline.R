@@ -1,4 +1,3 @@
-OS.name = Sys.info()["sysname"]
 if (!"seqinr" %in% installed.packages()) {
   
   #   if (tolower(OS.name) != "windows") {
@@ -74,7 +73,18 @@ if (!success){
     reads = as.character(paste('-1', align.args$m1,'-2', align.args$m2))
   }
   align.args$ignore.err = ignore.err
-  success = do.call(bowtie.align, args=align.args)  
+  if(compressed){
+    align.args$file.compression = file.compression
+    align.args$estimate.base.cov = estimate.base.cov    
+    success = do.call(bowtie.align.compressed, args=align.args)  
+    if(estimate.base.cov){
+      length = as.numeric(read.table("length", header=F))
+      base.cov = length/4*rl/genome.length
+      cat("\nesimated base coverage: ", base.cov, "\n")
+    }
+  } else {
+    success = do.call(bowtie.align, args=align.args)  
+  }
   if (!success){
     stop("Problem aligning reads to telomeric index\n")
   } else {

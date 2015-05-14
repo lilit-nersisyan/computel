@@ -1,0 +1,84 @@
+#########################################################################
+##############                 directories                 ##############
+#########################################################################
+
+scripts.dir	./scripts
+bowtie.build.path	./bowtie2-2.1.0-linux/bowtie2-build
+bowtie.align.path	./bowtie2-2.1.0-linux/bowtie2-align
+samtools.path	./samtools-0.1.19-linux/samtools
+picard.samtofastq.jar	./SamToFastq.jar
+
+
+#########################################################################
+##############                 input reads                 ##############
+#########################################################################
+
+read.length	76
+quals	--phred33 	#default: --phred33, alternatives: --phred64, --solexa-quals
+
+******** treat reads as single-end (single set to T) or paired-end (single set to F)
+single	T
+******** note: paired-end reads can effectively be treated as single-end, thus single is 'T' by default 
+******** note: compressed files can only be supplied as single-end reads 
+
+******** single-end reads # if files.with.prefix is 'T', files should be specified by filename prefix; if it is 'F' - by absolute paths 
+files.with.prefix	T	
+
+
+******** single-end reads specified by filename prefix (files.with.prefix is set to T)
+fastq.prefix	tel_reads
+fastq.dir	examples
+
+
+******** single-end reads specified by file paths (files.with.prefix is set to F)
+fastq	examples/tel_reads.fq, examples/tel_reads1.fq, examples/tel_reads2.fq	
+
+
+******** file compression type (can be 'F' (not compressed), "gz" or "bz2") - works only for single-end reads! 
+file.compression	gz
+
+
+
+******** if paired-end read alignment is prefered, 'single' should be set to 'F', and read pairs specified below: 
+******** paired-end reads file paths (set single to F)
+fastq1	examples/tel_reads1.fq
+fastq2	examples/tel_reads2.fq
+
+#########################################################################
+#############                 base coverage                 #############
+#########################################################################
+
+******** the base coverage is given or should be computed
+compute.base.cov	F
+
+base.cov	5.4
+base.index.pathtoprefix	./examples/base.index/base_index
+
+estimate.base.cov	T	#if 'T' and files are compressed, base coverage will be estimated during unzipping
+genome.length	3101804739
+
+
+#########################################################################
+################                 output                 #################
+#########################################################################
+
+output.dir	output
+
+
+#########################################################################
+###########                 execution options                 ###########
+#########################################################################
+
+num.proc	3
+ignore.err	F
+
+
+#########################################################################
+###########                 algorithm_options                 ###########
+#########################################################################
+
+pattern	TTAGGG
+num.haploid.chr	23
+min.seed	12
+mode.local	F
+

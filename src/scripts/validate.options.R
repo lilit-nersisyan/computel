@@ -27,8 +27,8 @@ set.property.double <- function(matrix, prop.name, default.value){
 }
 
 set.property.integer <- function(matrix, prop.name, default.value){
-  result = set.property(matrix, prop.name, default.value)
-  result = tryCatch({
+  result = set.property(matrix, prop.name, default.value)  
+  result = tryCatch({    
     as.integer(result)
   }, warning = function(w) {
     cat("Warning: Illegal value for", prop.name, ": ", result, 
@@ -117,9 +117,12 @@ defaults = list(
   num.haploid.chr = 23,
   output.dir = "output",
   compute.base.cov = F,
+  estimate.base.cov = F,
+  genome.length = 3101804739,
   mode.local = F,
   single = T,
   files.with.prefix = F,
+  file.compression = F,   
   min.seed = 12,
   num.proc = 3,
   scripts.dir = "./",
@@ -135,9 +138,48 @@ pattern = set.property.sequence(config.table, "pattern", defaults$pattern)
 
 num.haploid.chr = set.property.integer(config.table, "num.haploid.chr", defaults$num.haploid.chr)
 compute.base.cov = set.property.logical(config.table, "compute.base.cov",  defaults$compute.base.cov)
+
 mode.local = set.property.logical(config.table, "mode.local", defaults$mode.local)
 single = set.property.logical(config.table, "single", defaults$single)
 files.with.prefix = set.property.logical(config.table, "files.with.prefix", defaults$files.with.prefix)
+file.compression = set.property(config.table, "file.compression", defaults$file.compression)
+compressed = F
+if(file.compression != "F"){
+	if(file.compression == "gz"){
+		compressed = T
+	} else if (file.compression == "bz2"){
+		compressed = T		
+	} else {
+		compressed = F
+		cat("file.compressed should be either gz or bz2\n")
+		config.set = F
+	}
+} 
+if(compressed){
+	if(!single){
+		cat("compressed fastq files should be given with \"single\" parameter set to T")
+		config.set = F
+	}
+	OS.name = tolower(Sys.info()["sysname"])
+	if (OS.name == "windows"){
+    cat("compressed fastq files may not be given as input on Windows OS")\
+    config.set = F
+	}
+	  
+}
+estimate.base.cov = set.property.logical(config.table, "estimate.base.cov", defaults$estimate.base.cov)
+if(estimate.base.cov){
+  if(!compressed){
+    cat("Warning: base coverage is estimated only from gzip or bzip2 compressed files. Default base coverage", defaults$base.cov, "assigned.\n")
+    estimate.base.cov = F
+    base.cov = defaults$base.cov
+  }
+  if(compute.base.cov){
+    cat("Error: compute.base.cov and estimate.base.cov cannot be true at the same time\n")
+    config.set = F
+  }
+}
+genome.length = set.property.double(config.table, "genome.length", defaults$genome.length)
 min.seed = set.property.integer(config.table, "min.seed", defaults$min.seed)
 num.proc = set.property.integer(config.table, "num.proc", defaults$num.proc)
 
@@ -177,7 +219,7 @@ if(single){
       }
     }
     if(length(empty.fastqs) > 0)
-      fastqs=fastqs[-empty.fastqs]
+      fastqs=fastqs[-empty.fastqs]   
   } else {
     fastq.prefix = tryCatch({
       config.table["fastq.prefix",1]
@@ -197,11 +239,38 @@ if(single){
       cat("\"fastq.dir\" parameter not specified for single mode alignment\n")
       config.set = F
     })
-    fastq.files = list.files(path=fastq.dir, pattern=paste(fastq.prefix, "*",sep=""))
+    if(compressed){
+      suffix = file.compression
+      zip.pattern = paste(fastq.prefix, ".*","\\.", suffix,"$", sep="")
+      fastq.files = list.files(path=fastq.dir, zip.pattern)
+    } else {
+      suffix = ""
+      fastq.files = list.files(path=fastq.dir, paste(fastq.prefix, ".*\\.f.*q$", sep=""))
+    }
+    
+    
     fastqs = file.path(fastq.dir, fastq.files)
     if (length(list.files) == 0)
-      cat("no files with prefix ", fastq.prefix, " were present in the directory ", fastq.dir)     
+      cat("no files with pattern ", zip.pattern, " were present in the directory ", fastq.dir)     
   }  
+
+  #   check for compression type
+  if(compressed){
+    suffix = file.compression
+    for (fastq in fastqs){
+      sout = system(paste("file",fastq), intern = T)
+      if(suffix == "gz")
+        grout = grep("gzip compressed", sout)
+      else if(suffix == "bz2")
+        grout = grep("bzip2 compressed", sout)            
+    }
+    if(length(grout) == 0){
+#     zip.pattern = paste(".*\\.", suffix, "$",sep="")
+#     if(length(grep(zip.pattern, fastqs)) < length(fastqs))
+      cat("fastq file ", fastq, " was not ", suffix, " compressed", "\n")
+      config.set = F
+    }
+  }
 } else {
   fastq1 = tryCatch({
     config.table["fastq1",1]
@@ -274,9 +343,11 @@ if (compute.base.cov){
       config.set = F
     }      
   }      
-} else{
+} else if(estimate.base.cov){ 
+	base.cov = defaults$base.cov
+} else {
   base.cov = set.property.double(config.table, "base.cov", defaults$base.cov)
-}
+} 
 
 output.dir = set.property(config.table, "output.dir", defaults$output.dir)
 if(is.na(file.info(output.dir)$isdir || !file.info(output.dir)$isdir)){
@@ -338,16 +409,21 @@ if (config.set) {
     cat("fastq1 =", fastq1, "\n")
     cat("fastq2 =", fastq2, "\n")
   }  
+  if(compressed){
+    cat("file.compression =", file.compression, "\n")
+  }
   cat("read.length = ", rl,"\n")
   cat("pattern = ", pattern,"\n")
   cat("num.haploid.chr = ", num.haploid.chr,"\n")  
   cat ("min.seed =", min.seed, "\n")
   cat ("mode.local =", mode.local, "\n")
   cat("compute.base.cov =", compute.base.cov, "\n")
-  if (!compute.base.cov){
+  if (compute.base.cov){
+    cat("base.index.pathtoprefix =", base.index.pathtoprefix, "\n")        
+  } else if(estimate.base.cov){ 
+    cat("base.cov =  will be estimated from the zipped files\n")    
+  } else {
     cat("base.cov = ", base.cov,"\n")   
-  } else{ 
-    cat("base.index.pathtoprefix =", base.index.pathtoprefix, "\n")    
   }
   
   cat("output.dir= ", output.dir,"\n")   

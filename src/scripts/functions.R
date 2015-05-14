@@ -4,7 +4,7 @@ call.cmd <- function(command){
   if (OS.name == "windows")
     shell(command, wait = T)
   else 
-    system(command, wait = T)
+    system(paste("bash -c", "'", command, "'"), wait = T)
 }
 
 build.tel.index <- function(pattern, read.length, min.seed, 
@@ -135,6 +135,68 @@ bowtie.align <- function(bowtie.align.path, x, m1=NA, m2=NA, U=NA, S = "align.sa
   if (success){
     if (!ignore.err){
       success = (call.out == 0)
+    }
+  }
+  return(success)
+}
+#unzippes the files to stdout and pipes them to bowtie stdin as input. 
+#command template: 
+#cat fastq1 fastq2 ... | bunzip2(gunzip) - | tee >(wc -l > length) |
+# bowtie2-align -p additional.options -x index -U - -S samout
+
+bowtie.align.compressed <- function(bowtie.align.path, x, U=NA, S = "align.sam", 
+                         mode="--end-to-end", 
+                         additional.options = "", ignore.err = F, 
+                         file.compression, estimate.base.cov) {
+  args = ls();
+  index = as.character(paste('-x', x))    
+  
+  
+  reads = as.character(paste('-U', U));
+  U.gz = gsub(",", replacement=" ", U)
+  
+  
+  samout = as.character(paste('-S', S))
+  if (file.exists(S))
+    file.remove(S)
+    
+  options = as.character(paste('-q', mode, '--quiet', additional.options))
+  if(file.compression == "gz")
+    unzipper = "gunzip - "
+  else 
+    unzipper = "bunzip2 - "
+  cat("\nPerforming alignment with command:\n")
+  if(estimate.base.cov){    
+    command = as.character(paste("cat", U.gz, "|", unzipper, "|", 
+                                 "tee >(wc -l > length) |", bowtie.align.path, 
+                                 options, index, "-U - ", samout))
+    
+    cat(command)
+    call.out = call.cmd(command)
+    success = (file.exists(S) && file.info(S)$size > 0)
+    if (success){
+      if (!ignore.err){
+        success = (call.out == 0)
+      }
+    }
+    if(success){
+      success = (file.exists("length") && file.info("length")$size > 0)
+      if(!success){
+        cat("could not find file length for base coverage estimation \n")
+      }
+    }
+  } else {
+    command = as.character(paste("cat", U.gz, "|", unzipper, "|", 
+                                 bowtie.align.path, 
+                                 options, index, "-U - ", samout))
+    
+    cat(command)
+    call.out = call.cmd(command)
+    success = (file.exists(S) && file.info(S)$size > 0)
+    if (success){
+      if (!ignore.err){
+        success = (call.out == 0)
+      }
     }
   }
   return(success)
