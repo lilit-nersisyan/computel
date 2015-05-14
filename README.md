@@ -19,6 +19,6 @@ Nersisyan L, Arakelyan A (2015) Computel: Computation of Mean Telomere Length fr
 
 ### Feedback 
 This is the betta version of the software: your feedback at this point is critical for its further development! 
-Please, join the Computel discussion group at https://groups.google.com/forum/#!forum/computel-discussion-forum , and add your comments. Please, do not hesitate to share any inconvenience you face with our software, any bug you notice and any suggestion you have. 
+Please, join the Computel discussion group at https://groups.google.com/forum/#!forum/computel-discussion-forum, and add your comments. Please, do not hesitate to share any inconvenience you face with our software, any bug you notice and any suggestion you have. 
 
 If you're happy with Computel, let us know - make us happy too! 
