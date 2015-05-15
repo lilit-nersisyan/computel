@@ -3,7 +3,10 @@
 Computel is designed for measuring mean telomere length from Illumina Whole Genome NGS Sequencing data.
 
 ### Operating Systems
-Computel works with Windows and Unix operating systems, however in the v0.2 release, functionality of inputting compressed fastq files works only with Unix type systems. 
+Computel works with Windows and Unix operating systems. 
+
+### Releases
+In version v0.2, functionality of inputting compressed fastq files is added, but only for Unix type systems. 
 
 ### Installation
 For installation, download the src folder, and OS-specific binaries, and follow the instructions in the Computel User Manual. 
