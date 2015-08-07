@@ -5,10 +5,10 @@
 
 
 scripts.dir="scripts"
-bowtie.build.path="./bin/bowtie2-2.1.0-linux/bowtie2-build"
-bowtie.align.path="./bin/bowtie2-2.1.0-linux/bowtie2-align"
-samtools.path="./bin/samtools-0.1.19-linux/samtools"
-picard.samtofastq.jar="./bin/SamToFastq.jar"
+bowtie.build.path="./bin/bowtie2-2.1.0-win/bowtie2-build.exe"
+bowtie.align.path="./bin/bowtie2-2.1.0-win/bowtie2-align.exe"
+samtools.path="./bin/samtools-win/samtools.exe"
+picard.samtofastq.jar="/bin/SamToFastq.jar"
 
 ###input_reads
 read.length=76
@@ -16,12 +16,12 @@ quals = "--phred33" ##default: --phred33, alternatives: --phred64, --solexa-qual
 
 #treat reads as single-end (single set to T) or paired-end (single set to F)
 single=T
-# note: paired-end reads can effectively be treated as single-end, thus single is 'T' by default 
-# note: compressed files can only be supplied as single-end reads 
+# note: paired-end reads can effectively be treated as single-end, thus single is 'T' by default
+# note: compressed files can only be supplied as single-end reads
 
 ## single-end reads
-# if files.with.prefix is 'T', files should be specified by filename prefix; 
-# if it is 'F' - by absolute paths 
+# if files.with.prefix is 'T', files should be specified by filename prefix;
+# if it is 'F' - by absolute paths
 files.with.prefix =  T
 
 # single-end reads specified by filename prefix (files.with.prefix is set to T)
@@ -31,12 +31,12 @@ fastq.dir="examples"
 #single-end reads specified by file paths (files.with.prefix is set to F)
 fastq="examples/tel_reads.fq,../examples/tel_reads1.fq     ../examples/tel_reads2.fq"
 
-# file compression type (can be 'F' (not compressed), "gz" or "bz2") 
-# works only for single-end reads! 
+# file compression type (can be 'F' (not compressed), "gz" or "bz2")
+# works only for single-end reads!
 
-file.compression = "gz"
+file.compression = 'F'
 
-# if paired-end read alignment is prefered, 'single' should be set to 'F', and read pairs specified below: 
+# if paired-end read alignment is prefered, 'single' should be set to 'F', and read pairs specified below:
 # paired-end reads file paths (set single to F)
 fastq1="examples/tel_reads1.fq"
 fastq2="examples/tel_reads2.fq"
