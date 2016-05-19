@@ -155,7 +155,7 @@ bowtie.align.compressed <- function(bowtie.align.path, x, U=NA, S = "align.sam",
   reads = as.character(paste('-U', U));
   U.gz = gsub(",", replacement=" ", U)
   
-  
+  length.file = file.path(output.dir, "length")
   samout = as.character(paste('-S', S))
   if (file.exists(S))
     file.remove(S)
@@ -168,10 +168,10 @@ bowtie.align.compressed <- function(bowtie.align.path, x, U=NA, S = "align.sam",
   cat("\nPerforming alignment with command:\n")
   if(estimate.base.cov){    
     command = as.character(paste("cat", U.gz, "|", unzipper, "|", 
-                                 "tee >(wc -l > length) |", bowtie.align.path, 
+                                 "tee >(wc -l >", length.file,") |", bowtie.align.path, 
                                  options, index, "-U - ", samout))
     
-    cat(command)
+   cat(command)
     call.out = call.cmd(command)
     success = (file.exists(S) && file.info(S)$size > 0)
     if (success){
@@ -180,9 +180,9 @@ bowtie.align.compressed <- function(bowtie.align.path, x, U=NA, S = "align.sam",
       }
     }
     if(success){
-      success = (file.exists("length") && file.info("length")$size > 0)
+      success = (file.exists(length.file) && file.info(length.file)$size > 0)
       if(!success){
-        cat("could not find file length for base coverage estimation \n")
+        cat("could not find file ", length.file , " for base coverage estimation \n")
       }
     }
   } else {

@@ -78,8 +78,9 @@ if (!success){
     align.args$estimate.base.cov = estimate.base.cov    
     success = do.call(bowtie.align.compressed, args=align.args)  
     if(estimate.base.cov){
-      length = as.numeric(read.table("length", header=F))
-      base.cov = length/4*rl/genome.length
+      length.file = file.path(output.dir, "length")
+      fq.length = as.numeric(read.table(length.file, header=F))
+      base.cov = fq.length/4*rl/genome.length
       cat("\nesimated base coverage: ", base.cov, "\n")
     }
   } else {
