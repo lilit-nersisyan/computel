@@ -37,7 +37,7 @@ dir.create(align.dir, showWarnings=F)
 #######################################################################################
 #######################################################################################
 cat("\nBuilding telomeric index in the directory", tel.index.dir, "\n")
-success = build.tel.index(pattern, rl, min.seed=12, tel.index.dir, tel.index.prefix, 
+success = build.tel.index(pattern, rl, min.seed, tel.index.dir, tel.index.prefix, 
                           bowtie.build.path, ignore.err)
 if (!success){
   stop("Problem building telomeric index")
@@ -76,14 +76,15 @@ if (!success){
   if(compressed){
     align.args$file.compression = file.compression
     align.args$estimate.base.cov = estimate.base.cov    
-    success = do.call(bowtie.align.compressed, args=align.args)  
-    if(estimate.base.cov){
-      length = as.numeric(read.table("length", header=F))
-      base.cov = length/4*rl/genome.length
-      cat("\nesimated base coverage: ", base.cov, "\n")
-    }
+    success = do.call(bowtie.align.compressed, args=align.args)     
   } else {
     success = do.call(bowtie.align, args=align.args)  
+  }
+  if(estimate.base.cov){
+      length.file = file.path(output.dir, "length")
+      fq.length = as.numeric(read.table(length.file, header=F))
+      base.cov = fq.length/4*rl/genome.length
+      cat("\nesimated base coverage: ", base.cov, "\n")
   }
   if (!success){
     stop("Problem aligning reads to telomeric index\n")
@@ -183,11 +184,22 @@ if (!success){
     #######################################################################################
     cat("estimating telomere length \n")
     tel.length.out = file.path(output.dir, "tel.length.xls")
-    tel.length  = tel.length(tel.coverage, rl, pl= nchar(pattern), 
-                             base.cov, num.haploid.chr, tel.length.out)
+    tel.length  = tel.length(tel.coverage, fastqs,
+                             rl, pl= nchar(pattern),
+                             base.cov, num.haploid.chr, 
+                             genome.length, min.seed,
+                             tel.length.out)
     
-    cat("Telomere computation successfully complete.\n")
-    cat("Output stored at ", tel.length.out, "\n")
+    cat("\n**** Success ****\n")
+    cat("\nComputel successfully completed the calculations")
+    cat("\nThe output is stored at ", tel.length.out, "\n")
+    
+    if(is.nan(tel.length) || tel.length == 0) 
+      cat("\nWarning:\tNo telomeric reads have been identified!")
+    if(base.cov < 0.1)
+      cat("\nWarning:\tThe estimated base coverage of ", base.cov, "is too low! The results may not be accurate for base coverages of < 0.1.\n\n")
+    
+    
     
   }
 }

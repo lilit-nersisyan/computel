@@ -171,18 +171,31 @@ if (OS.name == "windows") {
 }
 estimate.base.cov = set.property.logical(config.table, "estimate.base.cov", defaults$estimate.base.cov)
 if(estimate.base.cov){
-  if(!compressed){
-    cat("Warning: base coverage is estimated only from gzip or bzip2 compressed files. Default base coverage", defaults$base.cov, "assigned.\n")
-    estimate.base.cov = F
-    base.cov = defaults$base.cov
-  }
+#  if(!compressed){
+#    cat("Warning: base coverage is estimated only from gzip or bzip2 compressed files. Default base coverage", defaults$base.cov, #"assigned.\n")
+#    estimate.base.cov = F
+#    base.cov = defaults$base.cov
+#  }
   if(compute.base.cov){
     cat("Error: compute.base.cov and estimate.base.cov cannot be true at the same time\n")
     config.set = F
   }
 }
 genome.length = set.property.double(config.table, "genome.length", defaults$genome.length)
+if(genome.length < rl){
+  cat("\nError: genome length (lgenome) cannot be less than the read length\n")
+  config.set = F
+}
+
 min.seed = set.property.integer(config.table, "min.seed", defaults$min.seed)
+if(min.seed > rl){
+  cat("\nError: min.seed cannot exceed the read length\n")
+  config.set = F
+}
+if(min.seed < defaults$min.seed){
+  cat("\nError: min.seed cannot be less than 12\n")
+  config.set = F
+}
 num.proc = set.property.integer(config.table, "num.proc", defaults$num.proc)
 
 quals = set.property(config.table, "quals", defaults$quals)

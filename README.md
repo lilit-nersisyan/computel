@@ -3,16 +3,27 @@
 Computel is designed for measuring mean telomere length from Illumina Whole Genome NGS Sequencing data.
 
 ### Operating Systems
-Computel works with Windows and Unix operating systems. 
+Computel v0.3 works with Unix operating system (tested for Ubuntu Linux). Computel version v0.2 works with Windows and Unix operating systems, however this version is harder to apply.
 
 ### Releases
-In version v0.2, functionality of inputting compressed fastq files is added, but only for Unix type systems. 
+Version v0.3 works with shell script and has a straightforward usage.  
+Version v0.2 works also with compressed fastq files.
+Version v0.1 works both Windows and Unix type operating systems, works with configuration files and Rscript. Works also with compressed fastq files.
+
+### System requirements
+You have to have R (version 3.0.3 or higher) installed in your system. 
 
 ### Installation
-For installation, download the src folder, and OS-specific binaries, and follow the instructions in the Computel User Manual. 
+For installation download and uncompress the Computel package in a local directory. The required binaries and files for setup configuration are set in the package. 
+
+### Usage 
+The basic usage is:
+
+./computel.sh [options] -1 <fq1> -2 <fq2> -o <outputpath> 
+
 
 #### Binaries
-Note, Computel works with only some versions of Bowtie, and with a modified version of Samtools. So if you'd like to use your own binaries, read the Computel User Manual carefully, before doing that! 
+Note, Computel works with only some versions of Bowtie, and with a modified version of Samtools. You can specify your own binaries with respective options, however, you may first want to refer to the Computel User Manual. 
 
 ### Citation
 Use the following citation to read about our software, and cite it in your research:

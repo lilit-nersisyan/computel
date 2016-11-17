@@ -53,17 +53,22 @@ complement <- function(pattern) {
   return(comp.pattern);
 }
 
-tel.length <- function(coverage.file, rl, pl,
-                       base.cov, num.haploid.chr, out.file){
+tel.length <- function(coverage.file, fastqs,
+                       rl, pl,
+                       base.cov, num.haploid.chr, 
+                       genome.length, min.seed,
+                       out.file){
   
   out.list = list()
   out.list$coverage.file = coverage.file
+  out.list$reads = paste(fastqs, collapse = ", ")
   out.list$read.length = rl
   out.list$pattern.length = pl
   out.list$base.cov = base.cov
   out.list$num.haploid.chr = num.haploid.chr
   out.list$tel.length = 0  
-    
+  out.list$genome.length = genome.length
+  out.list$min.seed = min.seed  
  
   
   
@@ -89,6 +94,8 @@ tel.length <- function(coverage.file, rl, pl,
   cat("base.cov= ", base.cov,"\n")
   cat("num.haploid.chr= ", num.haploid.chr,"\n")
   cat("tel.length=",  tel.length, "\n")
+  cat("genome.length=",  genome.length, "\n")
+  
   write.table(out.table, file = out.file, sep="\t")
   
   return(tel.length) 
@@ -128,7 +135,13 @@ bowtie.align <- function(bowtie.align.path, x, m1=NA, m2=NA, U=NA, S = "align.sa
     
   options = as.character(paste('-q', mode, '--quiet', additional.options))
   cat("\nPerforming alignment with command:\n")
-  command = as.character(paste(bowtie.align.path, options,index, reads, samout));   
+ # the paired end implementation should be remove, so will not bother with it anymore
+  length.file = file.path(output.dir, "length")
+  U.cat = gsub(",", replacement=" ", U)
+  command = as.character(paste("cat", U.cat, "|",  
+                                 "tee >(wc -l >", length.file,") |", bowtie.align.path, 
+                                 options, index, "-U - ", samout))
+#  command = as.character(paste(bowtie.align.path, options,index, reads, samout));   
   cat(command)
   call.out = call.cmd(command)
   success = (file.exists(S) && file.info(S)$size > 0)
@@ -136,9 +149,16 @@ bowtie.align <- function(bowtie.align.path, x, m1=NA, m2=NA, U=NA, S = "align.sa
     if (!ignore.err){
       success = (call.out == 0)
     }
+    if(success){
+      success = (file.exists(length.file) && file.info(length.file)$size > 0)
+      if(!success){
+        cat("could not find file ", length.file , " for base coverage estimation \n")
+      }
+    }
   }
   return(success)
 }
+
 #unzippes the files to stdout and pipes them to bowtie stdin as input. 
 #command template: 
 #cat fastq1 fastq2 ... | bunzip2(gunzip) - | tee >(wc -l > length) |
@@ -155,7 +175,7 @@ bowtie.align.compressed <- function(bowtie.align.path, x, U=NA, S = "align.sam",
   reads = as.character(paste('-U', U));
   U.gz = gsub(",", replacement=" ", U)
   
-  
+  length.file = file.path(output.dir, "length")
   samout = as.character(paste('-S', S))
   if (file.exists(S))
     file.remove(S)
@@ -168,10 +188,10 @@ bowtie.align.compressed <- function(bowtie.align.path, x, U=NA, S = "align.sam",
   cat("\nPerforming alignment with command:\n")
   if(estimate.base.cov){    
     command = as.character(paste("cat", U.gz, "|", unzipper, "|", 
-                                 "tee >(wc -l > length) |", bowtie.align.path, 
+                                 "tee >(wc -l >", length.file,") |", bowtie.align.path, 
                                  options, index, "-U - ", samout))
     
-    cat(command)
+   cat(command)
     call.out = call.cmd(command)
     success = (file.exists(S) && file.info(S)$size > 0)
     if (success){
@@ -180,9 +200,9 @@ bowtie.align.compressed <- function(bowtie.align.path, x, U=NA, S = "align.sam",
       }
     }
     if(success){
-      success = (file.exists("length") && file.info("length")$size > 0)
+      success = (file.exists(length.file) && file.info(length.file)$size > 0)
       if(!success){
-        cat("could not find file length for base coverage estimation \n")
+        cat("could not find file ", length.file , " for base coverage estimation \n")
       }
     }
   } else {
