@@ -21,7 +21,7 @@ Make computel.sh executable by running 'chmod +x computel.sh'.
 ### Usage 
 The basic usage is:
 
-./computel.sh [options] -1 <fq1> -2 <fq2> -o <outputpath> 
+./computel.sh [options] -1 \<fq1\> -2 \<fq2\> -o \<outputpath\> 
 
 
 #### Binaries
