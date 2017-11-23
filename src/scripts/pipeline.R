@@ -200,7 +200,7 @@ if (!success){
     if(is.nan(tel.length) || tel.length == 0) 
       cat("\nWarning:\tNo telomeric reads have been identified!")
     if(base.cov < 0.1)
-      cat("\nWarning:\tThe estimated base coverage of ", base.cov, "is too low! The results may not be accurate for base coverages of < 0.1.\nIf this is from the Computel test run don't worry :) Just check if the telomere length you got is the same as that in computel_out/tel.length.xls\n\n")
+      cat("\nWarning:\tThe estimated base coverage of ", base.cov, "is too low! The results may not be accurate for base coverages of < 0.1.\nIf this is from the Computel test run don't worry :) Just check if the telomere length you got is equal to 10683991\n\n")
     
     
     
