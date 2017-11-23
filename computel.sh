@@ -19,7 +19,7 @@ usage="\nProgram:\tcomputel
 \n\n\t<-minseed>\tthe min seed length (read length minus the number of flanking N's in the telomeric index; should be in the range [12-read.length]; This is a tested and carefully set parameter (defualt = 12); Change this only if you REALLY KNOW what you're doing!)
 \n\n\n********      TEST
 \n\nTo test how this works navigate to computel directory and run:\n./computel.sh -1 src/examples/tel_reads1.fq.gz -2 src/examples/tel_reads2.fq.gz -o mytest
-\n\nIn case of successful run, check if the content of mytest/tel.length.xls is the same as that in computel_out/tel.length.xls
+\n\nA successful test run, should return telomere length of 10683991 bp. 
 \n\n********      TEST
 \n"
 
