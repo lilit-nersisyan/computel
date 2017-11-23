@@ -96,7 +96,7 @@ tel.length <- function(coverage.file, fastqs,
   cat("tel.length=",  tel.length, "\n")
   cat("genome.length=",  genome.length, "\n")
   
-  write.table(out.table, file = out.file, sep="\t")
+  write.table(out.table, file = out.file, sep="\t", col.names = F, quote = F)
   
   return(tel.length) 
 }
@@ -228,22 +228,32 @@ coverage.from.sam <- function(samtools.path, sam.file, bam.file.name, dir){
   #bam.file = file.path(dir, "tel.align.bam")
   bam.file = file.path(dir, bam.file.name)  
   samtobam = paste(samtools.path, "view -bSh", sam.file, ">", bam.file)
-  cat("\nConverting sam file", sam.file,"to bam file", bam.file, "...\n")
+  cat("\nConverting sam file", sam.file,"to bam file", bam.file, "\n")
+  cat("\ncommand: ", samtobam, "\n")
   call.cmd(samtobam)
+  if(!file.exists(bam.file)){
+  	return("sam to bam conversion failed")
+  }
   
   #Sort bam
   ###################
   sorted.file = file.path(dir, paste(bam.file.name, "_sorted",sep=""))
-  sort = paste(samtools.path, "sort", bam.file, sorted.file)
+  sort = paste(samtools.path, "sort", bam.file, "-o", sorted.file)
   cat("\nSorting bam file", bam.file, "to", sorted.file, "\n")
+  cat("\ncommand: ", sort, "\n")
   call.cmd(sort)
   
   #Calculate depth
   ###################
-  sorted.file = paste(sorted.file, ".bam", sep="")
+  if(!file.exists(sorted.file)){
+  	return("bam sorting failed")
+  }
+
+  sorted.file = paste(sorted.file, sep="")
   coverage.file = file.path(dir, paste(bam.file.name, ".coverage.txt", sep=""))
-  depth = paste(samtools.path, "depth", sorted.file, ">", coverage.file)
+  depth = paste(samtools.path, "depth -d 1000000000", sorted.file, ">", coverage.file)
   cat("\nCalculating depth of coverage from bam file", sorted.file, "to", coverage.file, "\n")
+  cat("\ncommand: ", depth, "\n")
   call.cmd(depth)
   return(coverage.file)
 }
