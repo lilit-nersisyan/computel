@@ -1,7 +1,7 @@
 #!/bin/bash
 
 usage="\nProgram:\tcomputel
-\nVersion:\t0.3 
+\nVersion:\t0.4 
 \n\nusage:\t./computel.sh [options] {-1 <fq1> -2 <fq2> -3 <fq3> -o <o>}
 \n\nInput:
 \n\n\t<fq1>\tfastq file (the first pair or the only fastq file (for single end reads)
@@ -10,13 +10,17 @@ usage="\nProgram:\tcomputel
 \n\n\t<o>\toutput directory (optional: the default is computel_out)
 \n\nOptions (advanced):
 \n\n\t<-proc>\tnumber of processors to be used (default: 4)
-\n\n\t<-sam>\tsamtools path (optional: the required samtools is located at computel's bin directory. Change this only if it doesn't work)
+\n\n\t<-sam>\tsamtools path (optional: if not supplied, Computel will use the samtools installed on the system)
 \n\n\t<-bowal>\tbowtie2-align path (optional: the bowtie2-align is located at computel's bin directory by default.)
 \n\n\t<-bowb>\tbowtie2-build path (optional: the bowtie2-build is located at computel's bin directory by default.)
 \n\n\t<-nchr>\tnumber of chromosomes in a haploid set (the default is 23)
 \n\n\t<-lgenome>\twhole genome length (the default is 3244610000)
 \n\n\t<-pattern>\ttelomere repeat pattern (the default is 'TTAGGG'; change this if you're using Computel for a non-human organism)
 \n\n\t<-minseed>\tthe min seed length (read length minus the number of flanking N's in the telomeric index; should be in the range [12-read.length]; This is a tested and carefully set parameter (defualt = 12); Change this only if you REALLY KNOW what you're doing!)
+\n\n\n********      TEST
+\n\nTo test how this works navigate to computel directory and run:\n./computel.sh -1 src/examples/tel_reads1.fq.gz -2 src/examples/tel_reads2.fq.gz -o mytest
+\n\nIn case of successful run, check if the content of mytest/tel.length.xls is the same as that in computel_out/tel.length.xls
+\n\n********      TEST
 \n"
 
 
@@ -196,10 +200,17 @@ fi
 bowtie_align=`readlink -m $bowtie_align`
 
 
-if [ -z $samtools ]; then
-	samtools="$computel_dir/bin/samtools"
+if [ -z $samtools ]; then		
+	samtools=`which samtools`
+	if [ -z $samtools ]; then 
+		echo -e "$(tput setaf 1;) \nerror: samtools is not installed on your system.\nEither specify it with the -sam option or make sure it's in system path $(tput sgr0)"
+	exit 1
+	else		
+		samtools=`readlink -m $samtools`
+	fi
 fi
-samtools=`readlink -m $samtools`
+
+
 
 samtofastq="$computel_dir/bin/SamToFastq.jar"
 
@@ -277,7 +288,20 @@ else
 	echo -e "$(tput setaf 1;) \nerror: There are problems with samtools executable ($samtools). Please, check if it works properly in your system. $(tput sgr0)"
 	exit 1	
 fi
+
 #check if -8000 is set properly for samtools
+
+#first check if there is the "-d" option
+
+`$samtools "depth" 2>&1  | grep -q "maximum coverage depth";`
+if [ $? -eq 0 ]; then 
+	echo -e "\t$samtools does have maximum coverage depth option"
+else
+	echo -e "$(tput setaf 1;) \nerror: $samtools does not have a -d option. This version of Computel works with samtools 1.3 or higher. Please use Computel.v0.3 for older samtools versions, or install a newer version of samtools. $(tput sgr0)"
+	exit 1	
+fi
+
+#then check if it works
 if [ ! -d "$computel_dir/setup_test" ]; then
 	echo -e "$(tput setaf 3;)\nWarning: $(tput sgr0;) could not find directory $computel_dir/setup_test for testing samtools setup. \nPlease, locate the folder in the directory of computel.sh. \n"
 fi
@@ -292,23 +316,23 @@ fi
 
 depth="$setup_dir/test.depth.txt"
 
-`$samtools depth $test_bam > $depth`
+`$samtools depth -d 100000000 $test_bam > $depth`
 
 max_cov=`sort -nrk3 $depth | head -1 | cut -f 3`
 
 if [ $max_cov -gt 15000 ]; then 
 	echo -e "\tsamtools checked, the 8000 limit is set properly." 
 else
-	echo -e "$(tput setaf 1;) \nError: samtools at $samtools is not setup to account for the limit of 8000.\nIf you're not using the samtools executable from the computel original package, you have to build it according to the instructions in $computel_dir/Computel_v0.3_User_Manual.pdf $(tput sgr0;)"
+	echo -e "$(tput setaf 1;) \nError: samtools at $samtools is not setup to account for the limit of 8000.\nPlease, contact the application support team. $(tput sgr0;)"
 	exit 1
 fi
 
 
 
-if [ ! -f $samtofastq ]; then
-	echo "$(tput setaf 1;) \nerror: samtofastq was not found at $bin_dir, nor was it specified. $(tput sgr0)"
-	exit 1
-fi
+#if [ ! -f $samtofastq ]; then
+#	echo "$(tput setaf 1;) \nerror: samtofastq was not found at $bin_dir, nor was it specified. $(tput sgr0)"
+#	exit 1
+#fi
 
 <<mocak
 if [ ! -x $samtofastq ]; then
