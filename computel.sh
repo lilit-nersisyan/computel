@@ -329,22 +329,7 @@ fi
 
 
 
-#if [ ! -f $samtofastq ]; then
-#	echo "$(tput setaf 1;) \nerror: samtofastq was not found at $bin_dir, nor was it specified. $(tput sgr0)"
-#	exit 1
-#fi
 
-<<mocak
-if [ ! -x $samtofastq ]; then
-	`chmod +x $samtofastq`
-	if [ ! -x $samtofastq ]; then
-		echo "$(tput setaf 1;) \nerror: $samtofastq is not executable. Could not change the permissions. Please run \"sudo chmod +x $samtofastq\"  manually."
-	else 
-		echo "$samtofastq set as executable"	
-	fi
-	exit 1
-fi
-mocak
 echo -e "Computel is setup properly.\n"
 ############### end of setup test ######################
 
