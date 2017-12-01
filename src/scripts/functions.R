@@ -430,7 +430,7 @@ variant.counter <- function(file, normal.pattern){
     line = readLines(con, n = 1)
     if(length(line) == 0)
       break()
-    if(!startsWith(line, "@"))
+    if(!substr(line,1,1) != "@")
       break()
   }
 
