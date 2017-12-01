@@ -257,3 +257,223 @@ coverage.from.sam <- function(samtools.path, sam.file, bam.file.name, dir){
   call.cmd(depth)
   return(coverage.file)
 }
+
+
+
+############ telomeric repeat variant functions ##############
+
+
+rev.comp <- function(seq){
+  chars = strsplit(seq, split = "")[[1]]
+  comp.chars = chars 
+  comp.chars[which(chars == "A")] = "T"
+  comp.chars[which(chars == "T")] = "A"
+  comp.chars[which(chars == "G")] = "C"
+  comp.chars[which(chars == "C")] = "G"
+  
+  rev.comp.seq = paste0(comp.chars[length(comp.chars):1], collapse = "")
+  return(rev.comp.seq)
+}
+
+is.telomeric <- function(token, normal.pattern){
+  permutted = paste0(normal.pattern, substr(normal.pattern, 1, nchar(normal.pattern)-1), collapse = "")
+  return(grepl(token, permutted))
+}
+
+add.one.variant <- function(variant,n, variants, tokenqual = NULL, meanQual = NULL){
+  # cat(variant, "\n")
+  if(variant %in% names(variants))
+    variants[variant] = variants[variant] + n
+  else
+    variants[variant] = n
+  return(variants)
+}
+
+
+process.cigar <-function(cigar){
+  
+  d.ind  = c()
+  if(grepl("D", cigar)){
+    d.ind = gregexpr("D", cigar)[[1]]
+  }
+  
+  i.ind = c()
+  if(grepl("I", cigar)){
+    i.ind = gregexpr("I", cigar)[[1]]
+  }
+  
+  m.ind = c()
+  if(grepl("M", cigar)){
+    m.ind = gregexpr("M", cigar)[[1]]
+  }
+  breakpoints = c(m.ind, d.ind, i.ind)
+  breakpoints = sort(breakpoints, decreasing = F)
+  
+  cigar.string = c()
+  for(b in 1:length(breakpoints)){
+    if(b == 1){
+      numeral = as.numeric(substr(cigar, 1, breakpoints[b]-1))
+      if(breakpoints[b] %in% m.ind)
+        c = 'M'
+      else if (breakpoints[b] %in% d.ind)
+        c = 'D'
+      else 
+        c = 'I'
+      cigar.string = rep(c, numeral)
+    } else {
+      numeral = as.numeric(substr(cigar, breakpoints[b-1]+1, breakpoints[b]-1))
+      if(breakpoints[b] %in% m.ind)
+        c = 'M'
+      else if (breakpoints[b] %in% d.ind)
+        c = 'D'
+      else 
+        c = 'I'
+      cigar.string = c(cigar.string, rep(c,numeral))
+    }
+  }
+  
+  return(cigar.string)
+}
+
+process.line <- function(line, variants, silent = T, normal.pattern){
+  sam = strsplit(line, split="\t", fixed = T)[[1]]
+  seq = as.character(sam[10])
+  qual = utf8ToInt(as.character(sam[11]))
+  cigar = sam[6]
+  pos = as.numeric(sam[4])
+  
+  if(!silent){
+    cat(seq, "\n")
+    cat(qual, "\n")
+    cat(cigar, "\n")
+  }
+  
+  cigar.string = process.cigar(cigar)
+  
+  pn = nchar(normal.pattern)
+  tel.vec = strsplit(normal.pattern, split = "")[[1]]
+  qual.threshold = mean(qual)
+  
+  
+  if(pos > 1){
+    offset = (pos-1) %% pn
+    if(offset != 0){
+      prefix = substr(normal.pattern, 1, offset)
+      
+      cigar.string = c(rep("M", offset), cigar.string)
+      qual = c(rep(max(qual), offset), qual)
+      seq = paste0(prefix, seq, collapse = "")
+    }
+  }
+  seq.cursor = 1
+  cigar.cursor = 1
+  while(seq.cursor + pn -1 <= nchar(seq)){
+    base.count = 1
+    add =  T
+    var = ""
+    
+    while(base.count <= pn){
+      if(seq.cursor > nchar(seq))
+        break()
+      base = substr(seq, seq.cursor, seq.cursor)
+      tel.base = tel.vec[base.count]
+      base.cigar = cigar.string[cigar.cursor]
+      if(base.cigar == "M"){
+        if(base != tel.base){
+          base.qual = qual[seq.cursor]
+          if(base.qual < qual.threshold)
+            add = F
+        }
+        base.count = base.count + 1
+        seq.cursor = seq.cursor + 1
+        cigar.cursor = cigar.cursor + 1
+        var = paste0(var, base)
+      } else if (base.cigar == "I"){
+        base.count = base.count
+        seq.cursor = seq.cursor + 1
+        cigar.cursor = cigar.cursor + 1
+        base.qual = qual[seq.cursor]
+        if(base.qual < qual.threshold)
+          add = F 
+        var = paste0(var, base)
+      } else{ # base.cigar = "D" 
+        base.count = base.count + 1
+        seq.cursor = seq.cursor
+        cigar.cursor = cigar.cursor + 1
+        var = var 
+      }
+    }
+    if(add){
+      if(!silent)
+        cat("Added:\t", var, "\n")
+      variants = add.one.variant(var, 1, variants)
+    } else {
+      if(!silent)
+        cat("Disqualified:\t", var, "\n")
+    }
+  }
+  
+  return(variants)
+}
+
+
+
+variant.counter <- function(file, normal.pattern){
+  
+  #cat(file, "\n")
+  con = file(file, open = 'r')
+  
+  variants = c()
+  
+  
+  while(TRUE){
+    line = readLines(con, n = 1)
+    if(length(line) == 0)
+      break()
+    if(!startsWith(line, "@"))
+      break()
+  }
+
+  if(length(line) != 0) {
+
+  count = 1
+  while(TRUE){
+    # cat(count, "\n")
+    variants = process.line(line, variants, T, normal.pattern)
+    line = readLines(con, n = 1)
+    if(length(line) == 0 )
+      break()
+    count = count + 1
+  }
+  
+  }
+  close(con)
+  
+  return(variants)
+}
+
+count.variants <- function(file, normal.pattern, out.file){
+  variants = variant.counter(file, normal.pattern)
+  
+  variants = sort(variants, decreasing = T)
+  variants.perc = (variants/sum(variants))*100
+  
+  trv.rel = 100*variants.perc[-1]/sum(variants.perc[-1])
+  
+  
+  
+  trv.colnames = c("pattern", "abs num", "% of all patterns", "% of variants")
+  trv.mat = matrix(nrow = length(variants), ncol = length(trv.colnames))
+  trv.mat[,1] = unlist(lapply(names(variants), rev.comp))
+  trv.mat[,2] = variants
+  trv.mat[,3] = variants.perc
+  trv.mat[,4] = c("0", trv.rel)
+  colnames(trv.mat) = trv.colnames
+  write.table(trv.mat, out.file, quote = F, sep = "\t", row.names = F)
+  if(file.exists(out.file))
+    return(TRUE)
+  else
+    return(FALSE)
+}
+
+

@@ -182,9 +182,12 @@ if (!success){
         base.cov = base.coverage(coverage.file)
       } 
     }
-    # Compute telomere length
-    #######################################################################################
-    #######################################################################################
+
+
+
+	############################################## 				Compute telomere length			##########################################
+
+
     cat("estimating telomere length \n")
     tel.length.out = file.path(output.dir, "tel.length.xls")
     tel.length  = tel.length(tel.coverage, fastqs,
@@ -193,16 +196,35 @@ if (!success){
                              genome.length, min.seed,
                              tel.length.out)
     
-    cat("\n**** Success ****\n")
-    cat("\nComputel successfully completed the calculations")
-    cat("\nThe output is stored at ", tel.length.out, "\n")
+	
+	############################################## 				Compute telomere variants			##########################################
+
+    cat("\n\ncomputing telomeric variant composition\n")
+    tel.var.out = file.path(output.dir, "tel.variants.xls")
+    tel.var  = count.variants(file = reads.mapped, normal.pattern = pattern,  
+                              tel.var.out)
+    
+    if(tel.var == F)
+  
+    
+	############################################## 				Succcess			##########################################
+	
+	
+	cat("\n**** Success ****\n")
+	cat("\nComputel successfully completed the calculations")
+	cat("\nThe output is stored at ", tel.length.out, "\n")
+	if(tel.var){
+		cat("\nThe telomeric variant composition is written to ", tel.var.out, "\n")
+	}
+
+	
+	
     
     if(is.nan(tel.length) || tel.length == 0) 
-      cat("\nWarning:\tNo telomeric reads have been identified!")
+      cat("\n\nWarning:\tNo telomeric reads have been identified!")
     if(base.cov < 0.1)
       cat("\nWarning:\tThe estimated base coverage of ", base.cov, "is too low! The results may not be accurate for base coverages of < 0.1.\nIf this is from the Computel test run don't worry :) Just check if the telomere length you got is equal to 10683991\n\n")
-    
-    
-    
+	  
+	  
   }
 }
