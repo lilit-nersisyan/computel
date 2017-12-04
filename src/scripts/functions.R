@@ -418,11 +418,12 @@ process.line <- function(line, variants, silent = T, normal.pattern){
 
 
 
-variant.counter <- function(file, normal.pattern){
+variant.counter <- function(file, pattern){
   
   #cat(file, "\n")
   con = file(file, open = 'r')
   
+  normal.pattern = rev.comp(pattern)
   variants = c()
   
   
