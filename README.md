@@ -7,10 +7,15 @@ Computel v1.0 works with Unix operating system (tested for Ubuntu Linux). Comput
 
 ### Releases
 Version v1.0 has an additional feature of computing the relative abundance of telomeric canonical and variant repeat patterns among the telomeric reads. 
+
 Version v0.4.1 has fixed a minor bug from the v0.4 release. 
+
 Version v0.4 works with shell script and has a straightforward usage. This version of Computel uses the samtools (version 1.3 or higher) installed on the user's system, instead of the precompiled version coming with the previous releases. 
+
 Version v0.3 works with shell script and has a straightforward usage.  
+
 Version v0.2 works also with compressed fastq files.
+
 Version v0.1 works both Windows and Unix type operating systems, works with configuration files and Rscript. Works also with compressed fastq files.
 
 ### System requirements
