@@ -3,9 +3,11 @@
 Computel is designed for measuring mean telomere length from Illumina Whole Genome NGS Sequencing data.
 
 ### Operating Systems
-Computel v0.4 works with Unix operating system (tested for Ubuntu Linux). Computel version v0.2 works with Windows and Unix operating systems, however this version is harder to apply.
+Computel v1.0 works with Unix operating system (tested for Ubuntu Linux). Computel version v0.2 works with Windows and Unix operating systems, however this version is harder to apply.
 
 ### Releases
+Version v1.0 has an additional feature of computing the relative abundance of telomeric canonical and variant repeat patterns among the telomeric reads. 
+Version v0.4.1 has fixed a minor bug from the v0.4 release. 
 Version v0.4 works with shell script and has a straightforward usage. This version of Computel uses the samtools (version 1.3 or higher) installed on the user's system, instead of the precompiled version coming with the previous releases. 
 Version v0.3 works with shell script and has a straightforward usage.  
 Version v0.2 works also with compressed fastq files.
