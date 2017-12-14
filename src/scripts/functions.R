@@ -335,7 +335,7 @@ process.cigar <-function(cigar){
   return(cigar.string)
 }
 
-process.line <- function(line, variants, silent = T, normal.pattern){
+process.line <- function(line, variants, silent = T, normal.pattern, qual.threshold = NULL){
   sam = strsplit(line, split="\t", fixed = T)[[1]]
   seq = as.character(sam[10])
   qual = utf8ToInt(as.character(sam[11]))
@@ -352,8 +352,8 @@ process.line <- function(line, variants, silent = T, normal.pattern){
   
   pn = nchar(normal.pattern)
   tel.vec = strsplit(normal.pattern, split = "")[[1]]
-  qual.threshold = mean(qual)
-  
+  if(is.null(qual.threshold))
+    qual.threshold = mean(qual) 
   
   if(pos > 1){
     offset = (pos-1) %% pn
@@ -379,11 +379,9 @@ process.line <- function(line, variants, silent = T, normal.pattern){
       tel.base = tel.vec[base.count]
       base.cigar = cigar.string[cigar.cursor]
       if(base.cigar == "M"){
-        if(base != tel.base){
-          base.qual = qual[seq.cursor]
-          if(base.qual < qual.threshold)
-            add = F
-        }
+        base.qual = qual[seq.cursor]
+        if(base.qual < qual.threshold)
+          add = F
         base.count = base.count + 1
         seq.cursor = seq.cursor + 1
         cigar.cursor = cigar.cursor + 1
@@ -416,9 +414,7 @@ process.line <- function(line, variants, silent = T, normal.pattern){
   return(variants)
 }
 
-
-
-variant.counter <- function(file, pattern){
+variant.counter <- function(file, pattern, silent = T, qual.threshold = NULL){
   
   #cat(file, "\n")
   con = file(file, open = 'r')
@@ -440,7 +436,7 @@ variant.counter <- function(file, pattern){
   count = 1
   while(TRUE){
     # cat(count, "\n")
-    variants = process.line(line, variants, T, normal.pattern)
+    variants = process.line(line, variants, silent, normal.pattern, qual.threshold)
     line = readLines(con, n = 1)
     if(length(line) == 0 )
       break()
@@ -453,8 +449,8 @@ variant.counter <- function(file, pattern){
   return(variants)
 }
 
-count.variants <- function(file, normal.pattern, out.file){
-  variants = variant.counter(file, normal.pattern)
+count.variants <- function(file, pattern, out.file, qual.threshold = 58){
+  variants = variant.counter(file, pattern, qual.threshold = qual.threshold)
   
   variants = sort(variants, decreasing = T)
   variants.perc = (variants/sum(variants))*100
