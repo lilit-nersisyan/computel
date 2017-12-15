@@ -197,17 +197,17 @@ if (!success){
                              tel.length.out)
     
 	
-	############################################## 				Compute telomere variants			##########################################
+########################## 				Compute telomere variants			##########################
 
     cat("\n\ncomputing telomeric variant composition\n")
     tel.var.out = file.path(output.dir, "tel.variants.xls")
-    tel.var  = count.variants(file = reads.mapped, normal.pattern = pattern,  
-                              tel.var.out)
+    tel.var  = count.variants(file = reads.mapped, pattern = pattern,  
+                              tel.var.out, qual.threshold = qualt)
     
     if(tel.var == F)
   
     
-	############################################## 				Succcess			##########################################
+########################## 				Succcess			##########################
 	
 	
 	cat("\n**** Success ****\n")

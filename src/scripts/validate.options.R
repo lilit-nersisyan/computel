@@ -124,6 +124,7 @@ defaults = list(
   files.with.prefix = F,
   file.compression = F,
   min.seed = 12,
+	qualt = 25,	
   num.proc = 3,
   scripts.dir = "./",
   bowtie.dir = "../bowtie2-2.1.0/",
@@ -196,6 +197,21 @@ if(min.seed < defaults$min.seed){
   cat("\nError: min.seed cannot be less than 12\n")
   config.set = F
 }
+
+
+qualt = set.property.integer(config.table, "qualt", defaults$qualt)
+if(qualt > 72){
+  cat("\nError: qualt cannot exceed 72\n")
+  config.set = F
+}
+if(qualt < 0){
+  cat("\nError: qualt cannot be less than 0\n")
+  config.set = F
+}
+
+qualt=qualt + 33 #convert to Phred+33 ASCII values
+
+
 num.proc = set.property.integer(config.table, "num.proc", defaults$num.proc)
 
 quals = set.property(config.table, "quals", defaults$quals)
@@ -431,6 +447,7 @@ if (config.set) {
   cat("pattern = ", pattern,"\n")
   cat("num.haploid.chr = ", num.haploid.chr,"\n")
   cat ("min.seed =", min.seed, "\n")
+  cat ("qualt =", qualt, "\n")
   cat ("mode.local =", mode.local, "\n")
   cat("compute.base.cov =", compute.base.cov, "\n")
   if (compute.base.cov){
