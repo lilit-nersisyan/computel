@@ -2,12 +2,16 @@
 
 Computel is designed for measuring mean telomere length and abundance of canonical and variant telomeric repeats from Illumina Whole Genome NGS Sequencing data.
 
-### New feature: Computel version 1.0 computes the composition of telomeric repeat variants.
+### New feature: Computel versions >1.0 compute the composition of telomeric repeat variants.
 
 ### Operating Systems
-Computel v1.0 works with Unix operating system (tested for Ubuntu Linux). Computel version v0.2 works with Windows and Unix operating systems, however this version is harder to apply.
+Computel versions > v0.3 work with Unix operating system (tested for Ubuntu Linux). Computel version v0.2 works with Windows and Unix operating systems, however this version is harder to apply.
 
 ### Releases
+Version v1.2 allows to change the quality threshold (default being Phred+33 25)
+
+Version v1.1 computes telomeric variants with Phred+33 25 qual threshold. 
+
 Version v1.0 has an additional feature of computing the relative abundance of telomeric canonical and variant repeat patterns among the telomeric reads. 
 
 Version v0.4.1 has fixed a minor bug from the v0.4 release. 
