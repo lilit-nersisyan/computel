@@ -1,7 +1,7 @@
 #!/bin/bash
 
 usage="\nProgram:\tcomputel
-\nVersion:\t0.4.1 
+\nVersion:\t1.2  
 \n\nusage:\t./computel.sh [options] {-1 <fq1> -2 <fq2> -3 <fq3> -o <o>}
 \n\nInput:
 \n\n\t<fq1>\tfastq file (the first pair or the only fastq file (for single end reads)
@@ -17,6 +17,7 @@ usage="\nProgram:\tcomputel
 \n\n\t<-lgenome>\twhole genome length (the default is 3244610000)
 \n\n\t<-pattern>\ttelomere repeat pattern (the default is 'TTAGGG'; change this if you're using Computel for a non-human organism)
 \n\n\t<-minseed>\tthe min seed length (read length minus the number of flanking N's in the telomeric index; should be in the range [12-read.length]; This is a tested and carefully set parameter (defualt = 12); Change this only if you REALLY KNOW what you're doing!)
+\n\n\t<-qualt>\tPhred+33 quality threshold for telomeric repeat variant calling (default is 25. We recommend changing this value to 56 for Solexa+64 and Phred+64 quality formats)
 \n\n\n********      TEST
 \n\nTo test how this works navigate to computel directory and run:\n./computel.sh -1 src/examples/tel_reads1.fq.gz -2 src/examples/tel_reads2.fq.gz -o mytest
 \n\nA successful test run, should return telomere length of 10683991 bp. 
@@ -162,6 +163,16 @@ while [ $i -lt $n ]; do
 			else
 				let j=$i+1
 				declare minseed=${!j}	
+			fi
+		;;
+		"-qualt")
+			if [ $[$n-$i] -eq 1 ]; then
+				echo -e "$(tput setaf 1;) \nError: the <-qualt> argument not specified after \"qualt\"$(tput sgr0)"
+				echo -e $usage
+				exit 1	
+			else
+				let j=$i+1
+				declare qualt=${!j}	
 			fi
 		;;
 	esac
@@ -513,6 +524,12 @@ if [ -z $minseed ]; then
 	minseed="12"
 fi
 
+
+if [ -z $qualt ]; then
+	qualt="25"
+fi
+
+
 if [ -z $proc ]; then
 	proc="4"
 fi
@@ -555,6 +572,7 @@ output.dir	$out
 num.proc	$proc
 ignore.err	F
 quals	--phred33
+qualt	$qualt
 
 bzez
 
