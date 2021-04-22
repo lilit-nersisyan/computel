@@ -31,6 +31,11 @@ You have to have R (version 3.0.3 or higher) and samtools version 1.3 or higher 
 For installation download and uncompress the Computel package in a local directory. The required binaries and files for setup configuration are set in the package.
 Make computel.sh executable by running 'chmod +x computel.sh'. 
 
+#### Test installation
+To test how this works navigate to computel directory and run:
+./computel.sh -1 src/examples/tel_reads1.fq.gz -2 src/examples/tel_reads2.fq.gz -o mytest
+A successful test run, should return telomere length of 10683991 bp
+
 ### Usage 
 The basic usage is:
 
