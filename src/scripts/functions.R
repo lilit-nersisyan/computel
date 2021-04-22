@@ -53,52 +53,57 @@ complement <- function(pattern) {
   return(comp.pattern);
 }
 
-tel.length <- function(coverage.file, fastqs,
+get.tel.length <- function(coverage.file, fastqs,
                        rl, pl,
                        base.cov, num.haploid.chr, 
                        genome.length, min.seed,
                        out.file){
   
-  out.list = list()
-  out.list$coverage.file = coverage.file
-  out.list$reads = paste(fastqs, collapse = ", ")
-  out.list$read.length = rl
-  out.list$pattern.length = pl
-  out.list$base.cov = base.cov
-  out.list$num.haploid.chr = num.haploid.chr
-  out.list$tel.length = 0  
-  out.list$genome.length = genome.length
-  out.list$min.seed = min.seed  
- 
-  
-  
-  table.tel = read.table(file=coverage.file,col.names=c("position","orientation", "depth"));   
-  tl = length(table.tel$depth)
-  range = c(1:(rl+pl-1))
-  
-  if(length(table.tel[,1]) < length(range))
-    depth.tel=table.tel$depth/2/base.cov
-  else
-    depth.tel = table.tel$depth[range]/2/base.cov
-  
-  mean.length.rl.pl = mean(depth.tel)*(rl+pl-1)
-  tel.length = mean.length.rl.pl/num.haploid.chr
-  
-  out.list$tel.length = tel.length
-  out.table = as.matrix(out.list)
-  
-  cat("Computing telomere length from the followin parameters:\n")
-  cat("coverage.file= ", coverage.file,"\n")
-  cat("rl= ", rl,"\n")
-  cat("pl= ", pl,"\n")
-  cat("base.cov= ", base.cov,"\n")
-  cat("num.haploid.chr= ", num.haploid.chr,"\n")
-  cat("tel.length=",  tel.length, "\n")
-  cat("genome.length=",  genome.length, "\n")
-  
-  write.table(out.table, file = out.file, sep="\t", col.names = F, quote = F)
-  
-  return(tel.length) 
+	out.list = list()
+	out.list$tel.length = 0
+	#out.list$coverage.file = coverage.file
+	#out.list$reads = paste(fastqs, collapse = ", ")
+	out.list$read.length = rl
+	out.list$pattern.length = pl
+	out.list$base.cov = base.cov
+	out.list$num.haploid.chr = num.haploid.chr
+	out.list$genome.length = genome.length
+	out.list$min.seed = min.seed  
+	
+	
+	
+	table.tel = read.table(file=coverage.file,col.names=c("position","orientation", "depth"));
+	tl = length(table.tel$depth)
+	range = c(1:(rl+pl-1))
+	
+	if(length(table.tel[,1]) < length(range))
+		depth.tel=table.tel$depth/2/base.cov
+	else
+		depth.tel = table.tel$depth[range]/2/base.cov
+	
+	mean.length.rl.pl = mean(depth.tel)*(rl+pl-1)
+	out.list$tel.length = mean.length.rl.pl/num.haploid.chr
+	
+	out.table = as.matrix(out.list)
+	
+	cat("Computing telomere length from the followin parameters:\n")
+	#cat("coverage.file= ", coverage.file,"\n")
+	cat("rl= ", rl,"\n")
+	cat("pl= ", pl,"\n")
+	cat("base.cov= ", base.cov,"\n")
+	cat("num.haploid.chr= ", num.haploid.chr,"\n")
+	cat("genome.length=",  genome.length, "\n")
+	
+	cat("\n*******")
+	cat("\nMean telomere length estimated at ", out.list$tel.length, "bp\n")
+	cat("*******\n")
+	
+	sink(file = out.file)
+	colnames(out.table) = "estimate/value"
+	print(out.table)
+	sink(file = NULL)
+	
+	return(out.list$tel.length) 
 }
 
 base.coverage <- function(base.coverage.file){
@@ -175,7 +180,7 @@ bowtie.align.compressed <- function(bowtie.align.path, x, U=NA, S = "align.sam",
   reads = as.character(paste('-U', U));
   U.gz = gsub(",", replacement=" ", U)
   
-  length.file = file.path(output.dir, "length")
+  length.file = file.path(output.dir, "temp")
   samout = as.character(paste('-S', S))
   if (file.exists(S))
     file.remove(S)

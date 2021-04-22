@@ -1,15 +1,6 @@
-if (!"seqinr" %in% installed.packages()) {
-  
-  #   if (tolower(OS.name) != "windows") {
-  #     lib.paths = .libPaths()
-  #     user.dir.ind = which(regexpr("/home/", lib.paths, fixed=T)==1)
-  #     if(length(user.dir.ind) > 0 ) {
-  #       install.lib = lib.paths[ind]
-  #     } else {
-  #       
-  #     }
-  #     
-  #   }
+# checking and installing dependencies
+
+if (!"seqinr" %in% installed.packages()) {  
   install.packages("seqinr", repos = "http://cran.rstudio.com/")
 }
 if (!"psych" %in% installed.packages()) 
@@ -81,7 +72,7 @@ if (!success){
     success = do.call(bowtie.align, args=align.args)  
   }
   if(estimate.base.cov){
-      length.file = file.path(output.dir, "length")
+      length.file = file.path(output.dir, "temp")
       fq.length = as.numeric(read.table(length.file, header=F))
       base.cov = fq.length/4*rl/genome.length
       cat("\nesimated base coverage: ", base.cov, "\n")
@@ -189,25 +180,25 @@ if (!success){
 
 
     cat("estimating telomere length \n")
-    tel.length.out = file.path(output.dir, "tel.length.xls")
-    tel.length  = tel.length(tel.coverage, fastqs,
-                             rl, pl= nchar(pattern),
-                             base.cov, num.haploid.chr, 
-                             genome.length, min.seed,
-                             tel.length.out)
+    tel.length.out = file.path(output.dir, "tel.length.txt")
+    tel.length  = get.tel.length(tel.coverage, fastqs,
+								rl, pl= nchar(pattern),
+								base.cov, num.haploid.chr, 
+								genome.length, min.seed,
+								tel.length.out)
     
 	
-########################## 				Compute telomere variants			##########################
+	########################## 				Compute telomere variants			##########################
 
     cat("\n\ncomputing telomeric variant composition\n")
-    tel.var.out = file.path(output.dir, "tel.variants.xls")
+    tel.var.out = file.path(output.dir, "tel.variants.txt")
     tel.var  = count.variants(file = reads.mapped, pattern = pattern,  
                               tel.var.out, qual.threshold = qualt)
     
     if(tel.var == F)
   
     
-########################## 				Succcess			##########################
+	########################## 				Succcess			##########################
 	
 	
 	cat("\n**** Success ****\n")
