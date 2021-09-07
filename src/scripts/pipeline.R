@@ -24,6 +24,12 @@ tel.genome.fasta = "telomeric.genome.fasta"
 align.dir = file.path(output.dir, "align")
 dir.create(align.dir, showWarnings=F)
 
+if(compute.base.cov){
+  base.dir = file.path(output.dir, "base_align")
+  dir.create(base.dir, showWarnings=F)
+  unmapped.fq = file.path(base.dir, "unmapped.fq.gz")
+}
+
 # Build telomeric index                                                
 #######################################################################################
 #######################################################################################
@@ -48,7 +54,7 @@ if (!success){
   if (l > 22)
     l = 22
   
-  no.unal = ifelse(compute.base.cov,"", "--no-unal")
+  no.unal = ifelse(compute.base.cov, paste("--no-unal --un-gz", unmapped.fq), "--no-unal")
   
   align.args$additional.options = paste("-p", num.proc,quals, 
                                         no.unal, "--n-ceil", rl-min.seed, 
@@ -81,47 +87,13 @@ if (!success){
     stop("Problem aligning reads to telomeric index\n")
   } else {
     
-    #If compute.base.cov=T, separate mapped from unmapped reads
+
+    #If compute.base.cov=T, specify unmapped reads
     ###########################################################
-    if(!compute.base.cov){  
-      reads.mapped = align.args$S     
-    } else {
-      cat("Separating mapped from unmapped reads\n")
-      sam.file = align.args$S
-      reads.mapped = file.path(align.dir, "tel.align.mapped.sam")  
-      reads.unmapped = file.path(align.dir, "tel.align.unmapped.sam")  
-      
-      command.unmapped = paste(samtools.path, "view -Sh -f 4", sam.file,'>', reads.unmapped)
-      command.mapped = paste(samtools.path, "view -Sh -F 4", sam.file,'>', reads.mapped)
-      call.cmd(command.unmapped)
-      call.cmd(command.mapped)
-      
-      cat("Converting unmapped reads to fastq with command\n")  
-      samtofastq.command = paste("java -jar", picard.samtofastq.jar,
-                                 "VALIDATION_STRINGENCY=LENIENT", 
-                                 paste("INPUT=", reads.unmapped, sep=""))
-      base.dir = file.path(output.dir, "base")
-      dir.create(base.dir, showWarnings=F)
-      file.prefix = paste(base.dir, "/reads.unmapped", sep="")
-      if (!single){
-        base.fastq1 = paste(file.prefix, "_1.fastq", sep="")
-        base.fastq2 = paste(file.prefix, "_2.fastq", sep="")
-        base.fastq.unpaired = paste(file.prefix, "_unpaired.fastq", sep="")
-        
-        base.fastq1.opt = paste("FASTQ=", base.fastq1, sep="") 
-        base.fastq2.opt = paste("SECOND_END_FASTQ=", base.fastq2, sep="")  
-        base.fastq.unpaired.opt = paste("UNPAIRED_FASTQ=", base.fastq.unpaired, sep="")
-        samtofastq.command = paste(samtofastq.command, base.fastq1.opt, 
-                                   base.fastq2.opt, base.fastq.unpaired.opt)    
-      }
-      else {
-        base.fastq = paste(file.prefix, ".fastq", sep="")
-        base.fastq.opt = paste("FASTQ=", base.fastq, sep="")  
-        samtofastq.command = paste(samtofastq.command, base.fastq.opt, sep=" ")
-      }
-      print(samtofastq.command)
-      call.cmd(samtofastq.command)
-    }
+
+    reads.mapped = align.args$S
+    if(compute.base.cov)
+	base.fastq = unmapped.fq
     
     # Compute telomeric alignment coverage
     #######################################################################################
@@ -195,9 +167,13 @@ if (!success){
     tel.var  = count.variants(file = reads.mapped, pattern = pattern,  
                               tel.var.out, qual.threshold = qualt)
     
-    if(tel.var == F)
   
-    
+	########################## 				Remove tel.align.sam file			##########################
+
+	for(f in list.files(output.dir, "*.sam", recursive = T, full.names = T)){
+	  file.remove(f)
+	}
+
 	########################## 				Succcess			##########################
 	
 	

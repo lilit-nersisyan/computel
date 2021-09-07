@@ -1,3 +1,4 @@
+
 set.property <- function(matrix, prop.name, default.value){
   result = tryCatch({
     matrix[prop.name,1]
@@ -124,7 +125,7 @@ defaults = list(
   files.with.prefix = F,
   file.compression = F,
   min.seed = 12,
-	qualt = 25,	
+  qualt = 25,	
   num.proc = 3,
   scripts.dir = "./",
   bowtie.dir = "../bowtie2-2.1.0/",
@@ -134,6 +135,7 @@ defaults = list(
   quals = "--phred33",
   ignore.err = F
 )
+
 rl = set.property.integer(config.table, "read.length", defaults$rl)
 pattern = set.property.sequence(config.table, "pattern", defaults$pattern)
 
@@ -182,6 +184,7 @@ if(estimate.base.cov){
     config.set = F
   }
 }
+
 genome.length = set.property.double(config.table, "genome.length", defaults$genome.length)
 if(genome.length < rl){
   cat("\nError: genome length (lgenome) cannot be less than the read length\n")
@@ -364,16 +367,7 @@ if (compute.base.cov){
   }
   if (!base.index.set)
     config.set = F
-  picard.samtofastq.jar = set.property(config.table, "picard.samtofastq.jar", "n/a")
-  if(picard.samtofastq.jar == "n/a"){
-    cat("compute.base.cov was equal to T, but base.index.pathtoprefix was not specified.")
-    config.set = F
-  } else{
-    if(!file.exists(picard.samtofastq.jar)){
-      cat("Specified picard.samtofastq.jar file ", picard.samtofastq.jar, "does not exist\n")
-      config.set = F
-    }
-  }
+
 } else if(estimate.base.cov){
 	base.cov = defaults$base.cov
 } else {
@@ -390,6 +384,7 @@ if(is.na(file.info(output.dir)$isdir || !file.info(output.dir)$isdir)){
     dir.create(output.dir, showWarnings=F)
   }
 }
+
 
 scripts.dir = set.property(config.table, "scripts.dir", defaults$scripts.dir)
 scripts.dir.set = F
@@ -431,8 +426,6 @@ if (config.set) {
   cat("bowtie.build.path =", bowtie.build.path, "\n")
   cat("bowtie.align.path =", bowtie.align.path, "\n")
   cat("samtools.path =", samtools.path, "\n")
-  if(compute.base.cov)
-    cat("picard.samtofastq.jar =", picard.samtofastq.jar, "\n")
   cat("single =", single, "\n")
   if (single) {
     cat("fastqs =", fastqs, "\n")

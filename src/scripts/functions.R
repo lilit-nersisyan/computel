@@ -83,25 +83,29 @@ get.tel.length <- function(coverage.file, fastqs,
 	
 	mean.length.rl.pl = mean(depth.tel)*(rl+pl-1)
 	out.list$tel.length = mean.length.rl.pl/num.haploid.chr
+
+	sink(file = out.file)
+	cat("estimate\tvalue\n")
+
+#	out.table = as.matrix(out.list)
 	
-	out.table = as.matrix(out.list)
-	
-	cat("Computing telomere length from the followin parameters:\n")
+#	cat("Computing telomere length from the following parameters:\n")
 	#cat("coverage.file= ", coverage.file,"\n")
-	cat("rl= ", rl,"\n")
-	cat("pl= ", pl,"\n")
-	cat("base.cov= ", base.cov,"\n")
-	cat("num.haploid.chr= ", num.haploid.chr,"\n")
-	cat("genome.length=",  genome.length, "\n")
+	cat(paste0("Mean telomere length (bp)\t", out.list$tel.length, "\n"))
+	cat(paste0("Read length\t", rl,"\n"))
+	cat(paste0("Pattern length\t", pl,"\n"))
+	cat(paste0("Base coverage\t", base.cov,"\n"))
+	cat(paste0("Number of haploid chromosomes\t", num.haploid.chr,"\n"))
+	cat(paste0("Genome length\t",  genome.length, "\n"))
+	sink(file = NULL)
 	
 	cat("\n*******")
 	cat("\nMean telomere length estimated at ", out.list$tel.length, "bp\n")
 	cat("*******\n")
 	
-	sink(file = out.file)
-	colnames(out.table) = "estimate/value"
-	print(out.table)
-	sink(file = NULL)
+
+#	print(out.table)
+
 	
 	return(out.list$tel.length) 
 }
@@ -141,7 +145,7 @@ bowtie.align <- function(bowtie.align.path, x, m1=NA, m2=NA, U=NA, S = "align.sa
   options = as.character(paste('-q', mode, '--quiet', additional.options))
   cat("\nPerforming alignment with command:\n")
  # the paired end implementation should be remove, so will not bother with it anymore
-  length.file = file.path(output.dir, "length")
+  length.file = file.path(output.dir, "temp")
   U.cat = gsub(",", replacement=" ", U)
   command = as.character(paste("cat", U.cat, "|",  
                                  "tee >(wc -l >", length.file,") |", bowtie.align.path, 
@@ -238,6 +242,8 @@ coverage.from.sam <- function(samtools.path, sam.file, bam.file.name, dir){
   call.cmd(samtobam)
   if(!file.exists(bam.file)){
   	return("sam to bam conversion failed")
+  } else {
+#    file.remove(sam.file) # remove in the end of the pipeline as we need sam for variant calculations
   }
   
   #Sort bam
@@ -247,6 +253,14 @@ coverage.from.sam <- function(samtools.path, sam.file, bam.file.name, dir){
   cat("\nSorting bam file", bam.file, "to", sorted.file, "\n")
   cat("\ncommand: ", sort, "\n")
   call.cmd(sort)
+  if(!file.exists(sorted.file)){
+      	return("bam sorting failed")
+  } else {
+    file.remove(bam.file)
+    file.rename(sorted.file, file.path(dir, bam.file.name))
+    sorted.file = file.path(dir, bam.file.name)
+  }
+
   
   #Calculate depth
   ###################
@@ -317,7 +331,9 @@ process.cigar <-function(cigar){
   cigar.string = c()
   for(b in 1:length(breakpoints)){
     if(b == 1){
+    
       numeral = as.numeric(substr(cigar, 1, breakpoints[b]-1))
+
       if(breakpoints[b] %in% m.ind)
         c = 'M'
       else if (breakpoints[b] %in% d.ind)
@@ -458,6 +474,8 @@ variant.counter <- function(file, pattern, silent = T, qual.threshold = NULL){
 }
 
 count.variants <- function(file, pattern, out.file, qual.threshold = 58){
+  cat("Counting variants from file: ", file, "\n")
+
   variants = variant.counter(file, pattern, qual.threshold = qual.threshold)
   
   variants = sort(variants, decreasing = T)
