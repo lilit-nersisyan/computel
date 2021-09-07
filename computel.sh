@@ -1,7 +1,7 @@
 #!/bin/bash
 
 usage="\nProgram:\tcomputel
-\nVersion:\t1.2  
+\nVersion:\t0.4.1 
 \n\nusage:\t./computel.sh [options] {-1 <fq1> -2 <fq2> -3 <fq3> -o <o>}
 \n\nInput:
 \n\n\t<fq1>\tfastq file (the first pair or the only fastq file (for single end reads)
@@ -17,7 +17,7 @@ usage="\nProgram:\tcomputel
 \n\n\t<-lgenome>\twhole genome length (the default is 3244610000)
 \n\n\t<-pattern>\ttelomere repeat pattern (the default is 'TTAGGG'; change this if you're using Computel for a non-human organism)
 \n\n\t<-minseed>\tthe min seed length (read length minus the number of flanking N's in the telomeric index; should be in the range [12-read.length]; This is a tested and carefully set parameter (defualt = 12); Change this only if you REALLY KNOW what you're doing!)
-\n\n\t<-qualt>\tPhred+33 quality threshold for telomeric repeat variant calling (default is 25. We recommend changing this value to 56 for Solexa+64 and Phred+64 quality formats)
+\n\n\t<-ref>\tpath to reference genome index to which reads unaligned to the telomeric index should map; in this case, exact base coverage will be computed
 \n\n\n********      TEST
 \n\nTo test how this works navigate to computel directory and run:\n./computel.sh -1 src/examples/tel_reads1.fq.gz -2 src/examples/tel_reads2.fq.gz -o mytest
 \n\nA successful test run, should return telomere length of 10683991 bp. 
@@ -164,17 +164,21 @@ while [ $i -lt $n ]; do
 				let j=$i+1
 				declare minseed=${!j}	
 			fi
-		;;
-		"-qualt")
-			if [ $[$n-$i] -eq 1 ]; then
-				echo -e "$(tput setaf 1;) \nError: the <-qualt> argument not specified after \"qualt\"$(tput sgr0)"
-				echo -e $usage
-				exit 1	
-			else
-				let j=$i+1
-				declare qualt=${!j}	
-			fi
-		;;
+		 ;;
+		"-ref")
+		    if [ $[$n-$i] -eq 1 ]; then
+			echo -e "$(tput setaf 1;) \nError: the <ref> argument not specified after \"ref\"$(tput sgr0)"
+			echo -e $usage
+			exit 1	
+		    else
+			let j=$i+1
+			declare ref=${!j}
+			declare compute_base_cov=true
+			declare estimate_base_cov=false
+		    fi
+
+	;;
+		
 	esac
 
 	let i+=1
@@ -199,14 +203,19 @@ if [ ! -d $bin_dir ]; then
 fi
 
 if [ -z $bowtie_build ]; then
-	bowtie_build="$computel_dir/bin/bowtie2-build"
+	bowtie_build=$(which bowtie2-build)    
+#	bowtie_build="$computel_dir/bin/bowtie2-build"
 fi
 
 bowtie_build=`readlink -m $bowtie_build`
 
 
 if [ -z $bowtie_align ]; then
-	bowtie_align="$computel_dir/bin/bowtie2-align"
+    bowtie_align=$(which bowtie2-align)
+    if [ -z "${bowtie_align}" ]; then
+	bowtie_align=$(which bowtie2)
+    fi
+    #	bowtie_align="$computel_dir/bin/bowtie2-align"
 fi
 bowtie_align=`readlink -m $bowtie_align`
 
@@ -222,8 +231,6 @@ if [ -z $samtools ]; then
 fi
 
 
-
-samtofastq="$computel_dir/bin/SamToFastq.jar"
 
 echo "Computel: testing setup:"
 
@@ -268,7 +275,7 @@ if [ ! -x $bowtie_align ]; then
 	fi
 fi
 
-`$bowtie_align 2>&1 | grep -A1 "Usage" | grep -q "bowtie2-align"`
+`$bowtie_align 2>&1 | grep -A1 "Usage" | grep -q "bowtie2"`
 if [ $? -eq 0 ]; then 
 	echo -e "\t$bowtie_align is set properly"
 else
@@ -388,9 +395,11 @@ fi
 
 
 if [ -d $out ]; then
-	echo -e "$(tput setaf 3;)\nWarning:$(tput sgr0;)\tthe output directory $out already exists. Do you want to replace it? (y/n) "
-	ans=""
-	read ans
+	#echo -e "$(tput setaf 3;)\nWarning:$(tput sgr0;)\tthe output directory $out already exists. Do you want to replace it? (y/n) "
+	echo -e "$(tput setaf 3;)\nWarning:$(tput sgr0;)\tthe output directory $out already exists. Files will be replaced. "
+	#ans=""
+	#read ans
+	ans="y"
 	while [ ! "$ans" == "y" ]; do
 		if [ "$ans" == "n" ]; then
 			echo "computel cancelled"
@@ -524,15 +533,15 @@ if [ -z $minseed ]; then
 	minseed="12"
 fi
 
-
-if [ -z $qualt ]; then
-	qualt="25"
-fi
-
-
 if [ -z $proc ]; then
 	proc="4"
 fi
+
+if [ -z $ref ]; then
+    declare compute_base_cov=false
+    declare estimate_base_cov=true
+fi
+
 ############### end of setting configuration parameters ######################
 
 
@@ -548,7 +557,6 @@ scripts.dir	$computel_dir/src/scripts
 bowtie.build.path	$bowtie_build
 bowtie.align.path	$bowtie_align
 samtools.path	$samtools
-picard.samtofastq.jar	$samtofastq
 
 
 single	T
@@ -562,9 +570,10 @@ num.haploid.chr	$nchr
 min.seed	$minseed
 mode.local	F
 
-compute.base.cov	F
+compute.base.cov	$compute_base_cov
+base.index.pathtoprefix	$ref
 ##if files are compressed and the base coverage needs to be estimated during unzipping, set "estimate.base.cov" to T
-estimate.base.cov	T
+estimate.base.cov	$estimate_base_cov
 genome.length	$lgenome
 
 output.dir	$out	
@@ -572,7 +581,6 @@ output.dir	$out
 num.proc	$proc
 ignore.err	F
 quals	--phred33
-qualt	$qualt
 
 bzez
 
