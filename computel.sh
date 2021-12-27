@@ -11,8 +11,8 @@ usage="\nProgram:\tcomputel
 \n\nOptions (advanced):
 \n\n\t<-proc>\tnumber of processors to be used (default: 4)
 \n\n\t<-sam>\tsamtools path (optional: if not supplied, Computel will use the samtools installed on the system)
-\n\n\t<-bowal>\tbowtie2-align path (optional: the bowtie2-align is located at computel's bin directory by default.)
-\n\n\t<-bowb>\tbowtie2-build path (optional: the bowtie2-build is located at computel's bin directory by default.)
+\n\n\t<-bowal>\tbowtie2-align path (optional: Computel will use the default installation path in the user's directory)
+\n\n\t<-bowb>\tbowtie2-build path (optional: Computel will use the default installation path in the user's directory)
 \n\n\t<-nchr>\tnumber of chromosomes in a haploid set (the default is 23)
 \n\n\t<-lgenome>\twhole genome length (the default is 3244610000)
 \n\n\t<-pattern>\ttelomere repeat pattern (the default is 'TTAGGG'; change this if you're using Computel for a non-human organism)
@@ -196,28 +196,37 @@ done
 # find the directory of the script
 computel_dir=`dirname $0`
 
-bin_dir="$computel_dir/bin"
-if [ ! -d $bin_dir ]; then
-	echo "$(tput setaf 1;) \nerror: the bin directory is not found in the $computel_dir directory, nor it is specified. \"-1\"$(tput sgr0)"
-	exit 1
-fi
+#bin_dir="$computel_dir/bin"
+#if [ ! -d $bin_dir ]; then
+#	echo "$(tput setaf 1;) \nerror: the bin directory is not found in the $computel_dir directory, nor it is specified. \"-1\"$(tput sgr0)"#
+#	exit 1
+#fi
 
 if [ -z $bowtie_build ]; then
 	bowtie_build=$(which bowtie2-build)    
 #	bowtie_build="$computel_dir/bin/bowtie2-build"
+	if [ -z $bowtie_build ]; then 
+		echo -e "$(tput setaf 1;) \nerror: bowtie2-build is not installed on your system.\nEither specify it with the -bowb option or make sure it's in the system path $(tput sgr0)"
+		exit 1	
+	else
+		bowtie_build=`readlink -m $bowtie_build`
+	fi
 fi
-
-bowtie_build=`readlink -m $bowtie_build`
 
 
 if [ -z $bowtie_align ]; then
     bowtie_align=$(which bowtie2-align)
     if [ -z "${bowtie_align}" ]; then
 	bowtie_align=$(which bowtie2)
+	if [ -z $bowtie_align ]; then 
+		echo -e "$(tput setaf 1;) \nerror: bowtie2-align or bowtie2 is not installed on your system.\nEither specify it with the -bowal option or make sure it's in the system path $(tput sgr0)"
+		exit 1	
+	else
+		bowtie_align=`readlink -m $bowtie_align`
+	fi
     fi
     #	bowtie_align="$computel_dir/bin/bowtie2-align"
 fi
-bowtie_align=`readlink -m $bowtie_align`
 
 
 if [ -z $samtools ]; then		
@@ -237,7 +246,7 @@ echo "Computel: testing setup:"
 # testing bowtie2-build
 
 if [ ! -f $bowtie_build ]; then
-	echo -e "$(tput setaf 1;) \nError: bowtie2-build was not found at $bin_dir, nor was it specified. $(tput sgr0)"
+	echo -e "$(tput setaf 1;) \nError: bowtie2-build was not found in the system path nor was it specified. $(tput sgr0)"
 	exit 1
 fi
 if [ ! -x $bowtie_build ]; then
