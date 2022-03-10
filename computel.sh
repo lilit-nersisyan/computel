@@ -210,19 +210,27 @@ if [ -z $bowtie_build ]; then
 		exit 1	
 	else
 		bowtie_build=`readlink -m $bowtie_build`
+		if [ -z $bowtie_build ]; then
+			echo -e "$(tput setaf 1;) \nerror: Could not find the default location of bowtie_build on your system.\nEither specify it with the -bowb option or make sure it's in system path $(tput sgr0)"
+			exit 1
+		fi
 	fi
 fi
 
 
 if [ -z $bowtie_align ]; then
     bowtie_align=$(which bowtie2-align)
-    if [ -z "${bowtie_align}" ]; then
+    if [ -z $bowtie_align ]; then
 	bowtie_align=$(which bowtie2)
 	if [ -z $bowtie_align ]; then 
 		echo -e "$(tput setaf 1;) \nerror: bowtie2-align or bowtie2 is not installed on your system.\nEither specify it with the -bowal option or make sure it's in the system path $(tput sgr0)"
 		exit 1	
 	else
 		bowtie_align=`readlink -m $bowtie_align`
+		if [ -z $bowtie_align ]; then
+			echo -e "$(tput setaf 1;) \nerror: Could not find the default location of bowtie_align on your system.\nEither specify it with the -bowal option or make sure it's in system path $(tput sgr0)"
+			exit 1
+		fi
 	fi
     fi
     #	bowtie_align="$computel_dir/bin/bowtie2-align"
@@ -233,9 +241,13 @@ if [ -z $samtools ]; then
 	samtools=`which samtools`
 	if [ -z $samtools ]; then 
 		echo -e "$(tput setaf 1;) \nerror: samtools is not installed on your system.\nEither specify it with the -sam option or make sure it's in system path $(tput sgr0)"
-	exit 1
+		exit 1
 	else		
 		samtools=`readlink -m $samtools`
+		if [ -z $samtools ]; then
+			echo -e "$(tput setaf 1;) \nerror: Could not find the default location of samtools on your system.\nEither specify it with the -sam option or make sure it's in system path $(tput sgr0)"
+			exit 1
+		fi
 	fi
 fi
 
@@ -263,7 +275,7 @@ fi
 if [ $? -eq 0 ]; then 
 	echo -e "\t$bowtie_build is set properly"
 else
-	echo -e "$(tput setaf 1;) \nError: There are problems with $bowtie_build executable. Please, check if $bowtie_build works properly in your system. $(tput sgr0)"
+	echo -e "$(tput setaf 1;) \nError: There are problems with bowtie2-build $bowtie_build executable. Please, check if $bowtie_build works properly in your system. $(tput sgr0)"
 	exit 1
 fi
 
