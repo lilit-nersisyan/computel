@@ -1,7 +1,7 @@
 #!/bin/bash
 
 usage="\nProgram:\tcomputel
-\nVersion:\t0.4.1 
+\nVersion:\t1.3 
 \n\nusage:\t./computel.sh [options] {-1 <fq1> -2 <fq2> -3 <fq3> -o <o>}
 \n\nInput:
 \n\n\t<fq1>\tfastq file (the first pair or the only fastq file (for single end reads)
