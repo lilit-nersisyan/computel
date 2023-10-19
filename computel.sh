@@ -1,7 +1,7 @@
 #!/bin/bash
 
 usage="\nProgram:\tcomputel
-\nVersion:\t1.3 
+\nVersion:\t1.4
 \n\nusage:\t./computel.sh [options] {-1 <fq1> -2 <fq2> -3 <fq3> -o <o>}
 \n\nInput:
 \n\n\t<fq1>\tfastq file (the first pair or the only fastq file (for single end reads)
@@ -330,14 +330,25 @@ fi
 
 #check if -8000 is set properly for samtools
 
-#first check if there is the "-d" option
-
-`$samtools "depth" 2>&1  | grep -q "maximum coverage depth";`
-if [ $? -eq 0 ]; then 
-	echo -e "\t$samtools does have maximum coverage depth option"
-else
-	echo -e "$(tput setaf 1;) \nerror: $samtools does not have a -d option. This version of Computel works with samtools 1.3 or higher. Please use Computel.v0.3 for older samtools versions, or install a newer version of samtools. $(tput sgr0)"
-	exit 1	
+# Get the version to check the '-d' option if the version is older than 1.13
+samtools_version=$(samtools 2>&1 | grep -o 'Version: [0-9.]*') #gets the samtools version
+    
+if [ -n "$samtools_version" ]; then
+	echo "samtools version: $samtools_version"
+        
+        # Compare samtools version with 1.13
+        if [ "$(printf "$samtools_version\n1.13" | sort -V | head -n1)" == "1.13" ]; then
+            echo "samtools version is 1.13 or higher."
+        else
+            
+            # Check the '-d' option
+            samtools "depth" 2>&1 | grep -q "maximum coverage depth"
+            if [ $? -eq 0 ]; then 
+                echo -e "\t$samtools does have a maximum coverage depth option"
+            fi
+        fi
+    else
+	 echo "Failed to determine samtools version."
 fi
 
 #then check if it works
