@@ -1,7 +1,7 @@
 #!/bin/bash
 
 usage="\nProgram:\tcomputel
-\nVersion:\t1.3 
+\nVersion:\t1.4
 \n\nusage:\t./computel.sh [options] {-1 <fq1> -2 <fq2> -3 <fq3> -o <o>}
 \n\nInput:
 \n\n\t<fq1>\tfastq file (the first pair or the only fastq file (for single end reads)
@@ -338,6 +338,7 @@ if [ -n "$samtools_version" ]; then
         
         # Compare samtools version with 1.13
         if [ "$(printf "$samtools_version\n1.13" | sort -V | head -n1)" == "1.13" ]; then
+
             echo "Samtools is set correctly"
         else
             
@@ -345,7 +346,9 @@ if [ -n "$samtools_version" ]; then
             samtools "depth" 2>&1 | grep -q "maximum coverage depth"
             if [ $? -eq 0 ]; then 
                 echo -e "\t$samtools does have a maximum coverage depth option"
+
 	else echo -e "\nerror:Computel works with Samtools versions 1.3, we have detected version ($samtools_version). Please upgrade Samtools on your system or provide the correct version."
+
             fi
         fi
     else
