@@ -110,12 +110,39 @@ get.tel.length <- function(coverage.file, fastqs,
 	return(out.list$tel.length) 
 }
 
-base.coverage <- function(base.coverage.file){
-  coverage.table = read.table(file=coverage.file,col.names=c("position","orientation", "depth"));   
-  depth = coverage.table$depth
-  mean.cov = mean(depth)
+
+base.coverage <- function(coverage.file) {
+  # Open the file for reading
+  con <- file(coverage.file, "r")
+
+  # Initialize variables
+  total.depth <- 0
+  line_count <- 0
+
+  # Loop through each line in the file
+  while (length(line <- readLines(con, n = 1, warn = FALSE)) > 0) {
+    # Split the line into columns
+    columns <- strsplit(line, "\t")[[1]]  # Assuming tab-separated values, adjust as needed
+
+    # Extract the depth from the appropriate column
+    depth <- as.numeric(columns[3])  # Adjust the index based on your file structure
+
+    # Add depth to the total
+    total.depth <- total.depth + depth
+
+    # Increment line count
+    line_count <- line_count + 1
+  }
+
+  # Close the file
+  close(con)
+
+  # Calculate the mean coverage
+  mean.cov <- total.depth / line_count
+
   return(mean.cov)
 }
+
 
 string2vector <- function(pattern){
   pattern = toupper(pattern)  
